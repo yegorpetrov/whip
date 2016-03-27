@@ -23,11 +23,7 @@ namespace Whip.Widgets
         {
             var xdef = xml.Name.LocalName == "layout" ?
                 xml :
-                store
-                    .Root
-                    .Descendants("groupdef") // :TODO: Optimize
-                    .Where(d => d.Attribute("id").Value == xml.Attribute("id").Value)
-                    .FirstOrDefault();
+                store.GetGroupDef(xml.Attribute("id").Value);
 
             if (xdef == null) return null;
 
