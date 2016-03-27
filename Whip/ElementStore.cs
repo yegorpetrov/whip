@@ -18,6 +18,9 @@ namespace Whip
             = new Dictionary<string, BitmapSource>();
         readonly IDictionary<string, BitmapSource> files
             = new Dictionary<string, BitmapSource>();
+        readonly IDictionary<string, XElement> groupdefs
+            = new Dictionary<string, XElement>();
+        bool preloaded;
 
         public ElementStore(XDocument xml, string root)
         {
@@ -30,18 +33,45 @@ namespace Whip
             get { return xml; }
         }
 
+        public ElementStore Next
+        {
+            get;
+            set;
+        }
+
         public void Preload()
         {
+            if (preloaded) return;
             foreach (var entry in xml.Descendants("bitmap"))
             {
                 bitmaps[entry.Attribute("id").Value] = LoadBitmap(entry);
             }
+            foreach (var entry in xml.Descendants("groupdef"))
+            {
+                groupdefs[entry.Attribute("id").Value] = entry;
+            }
+            preloaded = true;
+        }
+
+        public XElement GetGroupDef(string id)
+        {
+            var result = default(XElement);
+            if (!groupdefs.TryGetValue(id, out result) && !preloaded)
+            {
+                var entry = xml.Descendants("groupdef")
+                    .FirstOrDefault(b => b.Attribute("id").Value == id);
+                if (entry != null)
+                {
+                    groupdefs[id] = result = entry;
+                }
+            }
+            return result ?? Next?.GetGroupDef(id);
         }
 
         public BitmapSource GetBitmap(string id)
         {
             var result = default(BitmapSource);
-            if (!bitmaps.TryGetValue(id, out result))
+            if (!bitmaps.TryGetValue(id, out result) && !preloaded)
             {
                 var entry = xml.Descendants("bitmap")
                     .FirstOrDefault(b => b.Attribute("id").Value == id);
@@ -50,7 +80,7 @@ namespace Whip
                     bitmaps[id] = result = LoadBitmap(entry);
                 }
             }
-            return result;
+            return result ?? Next?.GetBitmap(id);
         }
 
         private BitmapSource LoadBitmap(XElement entry)
