@@ -10,7 +10,7 @@ namespace Whip
 {
     class SkinBootstrapper
     {
-        const string root = @"e:\testdata\winamp\Winamp Modern\";
+        const string root = @"e:\testdata\winamp\Big Bento\";
         
         public SkinBootstrapper()
         {
@@ -19,8 +19,7 @@ namespace Whip
 
             var store = new ElementStore(skin, root);
             store.Preload();
-            var bmp = store.GetBitmap("player.main.right");
-
+            
             var containers =
                 skin
                 .Elements()
@@ -32,7 +31,7 @@ namespace Whip
                 .Where(c => c.Attribute("id").Value == "main")
                 .First();
 
-            Container.FromXml(main).Show();
+            Container.FromXml(main, store).Show();
         }
     }
 }
