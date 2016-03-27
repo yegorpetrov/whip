@@ -186,8 +186,8 @@ namespace Whip
                 child.Arrange(new Rect(
                     calcRelat(pw, x, rx),
                     calcRelat(ph, y, ry),
-                    calcRelat(pw, w, rw),
-                    calcRelat(ph, h, rh)
+                    Math.Max(0, calcRelat(pw, w, rw)),
+                    Math.Max(0, calcRelat(ph, h, rh))
                     ));
 
             }
