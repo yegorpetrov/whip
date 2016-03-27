@@ -26,8 +26,15 @@ namespace Whip
             {
                 var ctx = new XmlParserContext(null, null, null, null,
                     null, null, path, null, XmlSpace.Default);
-                result = new XmlTextReader(File.OpenRead(path),
-                    XmlNodeType.Element, ctx);
+                try
+                {
+                    result = new XmlTextReader(File.OpenRead(path),
+                        XmlNodeType.Element, ctx);
+                }
+                catch (FileNotFoundException)
+                {
+                    return null;
+                }
             }
             else
             {
@@ -44,14 +51,19 @@ namespace Whip
             {
                 if (current.LocalName == "include")
                 {
-                    includeStack.Push(current);
-                    current = MakeReader(
+                    var rd = MakeReader(
                         Path.Combine(
                             Path.GetDirectoryName(current.BaseURI),
                             current["file"]
                             ),
                         true);
-                    return Read();
+                    if (rd != null)
+                    {
+                        includeStack.Push(current);
+                        current = rd;
+                        return Read();
+                    }
+                    else return true;
                 }
                 else return true;
             }
