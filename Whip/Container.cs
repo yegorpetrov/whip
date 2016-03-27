@@ -4,22 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Linq;
 
 namespace Whip
 {
     class Container : Window, IXmlConfigurable
     {
-        public static Container FromXml(XElement x)
+        public static Container FromXml(XElement x, ElementStore store)
         {
-            return x
-                .Attributes()
-                .Aggregate(
-                    new Container(), (c, a) =>
-                    {
-                        c.SetXmlProperty(a.Name.LocalName, a.Value);
-                        return c;
-                    });
+            var result = new Container();
+            foreach (var a in x.Attributes())
+            {
+                result.SetXmlProperty(a.Name.LocalName, a.Value);
+            }
+            result.Content = GuiObject.FromXml(x.Element("layout"), store);
+            return result;
         }
 
         public string GetXmlProperty(string name)
