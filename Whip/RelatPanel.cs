@@ -171,11 +171,15 @@ namespace Whip
 
             foreach (var child in InternalChildren.OfType<UIElement>())
             {
+                bool
+                    wset = child.ReadLocalValue(WProperty) != DependencyProperty.UnsetValue,
+                    hset = child.ReadLocalValue(HProperty) != DependencyProperty.UnsetValue;
+
                 int
                     x = GetX(child),
                     y = GetY(child),
-                    w = GetW(child),
-                    h = GetH(child),
+                    w = wset ? GetW(child) : (int)Math.Round(child.DesiredSize.Width),
+                    h = hset ? GetH(child) : (int)Math.Round(child.DesiredSize.Height),
                     rx = GetRelatX(child),
                     ry = GetRelatY(child),
                     rw = GetRelatW(child),
