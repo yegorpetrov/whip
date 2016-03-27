@@ -25,9 +25,7 @@ namespace Whip
                 xml :
                 store
                     .Root
-                    .Elements()
-                    .First()
-                    .Elements("groupdef")
+                    .Descendants("groupdef") // :TODO: Optimize
                     .Where(d => d.Attribute("id").Value == xml.Attribute("id").Value)
                     .FirstOrDefault();
 
