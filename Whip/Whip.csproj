@@ -57,10 +57,17 @@
     </ApplicationDefinition>
     <Compile Include="Container.cs" />
     <Compile Include="ElementStore.cs" />
+    <Compile Include="Group.cs" />
+    <Compile Include="GuiObject.cs" />
+    <Compile Include="ImageTest.cs" />
     <Compile Include="IXmlConfigurable.cs" />
     <Compile Include="RelatPanel.cs" />
     <Compile Include="SkinBootstrapper.cs" />
     <Compile Include="WinampXmlReader.cs" />
+    <Compile Include="XmlAdapter\ByteTo01Adapter.cs" />
+    <Compile Include="XmlAdapter\IntegerAdapter.cs" />
+    <Compile Include="XmlAdapter\IXmlDpAdapter.cs" />
+    <Compile Include="XmlAdapter\BooleanVisibilityAdapter.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
