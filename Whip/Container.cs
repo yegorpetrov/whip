@@ -1,0 +1,69 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Xml.Linq;
+
+namespace Whip
+{
+    class Container : Window, IXmlConfigurable
+    {
+        public static Container FromXml(XElement x)
+        {
+            return x
+                .Attributes()
+                .Aggregate(
+                    new Container(), (c, a) =>
+                    {
+                        c.SetXmlProperty(a.Name.LocalName, a.Value);
+                        return c;
+                    });
+        }
+
+        public string GetXmlProperty(string name)
+        {
+            var result = default(string);
+            ProcessXmlProperty(name, ref result);
+            return result;
+        }
+
+        public void SetXmlProperty(string name, string value)
+        {
+            ProcessXmlProperty(name, ref value);
+        }
+
+        /// <summary>
+        /// Get or set specified property string
+        /// </summary>
+        /// <param name="name">Property name</param>
+        /// <param name="value">Property value (null to get, non-null to set)</param>
+        private void ProcessXmlProperty(string name, ref string value)
+        {
+            var get = value == null;
+            switch (name)
+            {
+                case "id": value = Name = value ?? Name; break;
+                case "name": value = Title = value ?? Title; break;
+                case "default_x":
+                case "default_y":
+                case "default_w":
+                case "default_h":
+                    {
+                        var dp = default(DependencyProperty);
+                        switch (name.Last())
+                        {
+                            case 'x': dp = LeftProperty; break;
+                            case 'y': dp = TopProperty; break;
+                            case 'w': dp = WidthProperty; break;
+                            case 'h': dp = HeightProperty; break;
+                        }
+                        if (get) value = Math.Round((double)GetValue(dp)).ToString();
+                        else SetValue(dp, double.Parse(value));
+                    }
+                    break;
+            }
+        }
+    }
+}
