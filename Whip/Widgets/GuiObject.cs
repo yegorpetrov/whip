@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Xml.Linq;
 using Whip.XmlAdapter;
 
-namespace Whip
+namespace Whip.Widgets
 {
     abstract class GuiObject : ContentControl, IXmlConfigurable
     {

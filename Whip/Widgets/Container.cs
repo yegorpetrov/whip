@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
 
-namespace Whip
+namespace Whip.Widgets
 {
     class Container : Window, IXmlConfigurable
     {

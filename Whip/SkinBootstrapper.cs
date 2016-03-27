@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Whip.Widgets;
 
 namespace Whip
 {
     class SkinBootstrapper
     {
-        const string root = @"e:\testdata\winamp\Big Bento\";
+        const string root = @"e:\testdata\winamp\Winamp3\";
         
         public SkinBootstrapper()
         {

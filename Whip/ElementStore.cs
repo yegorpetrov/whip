@@ -100,7 +100,7 @@ namespace Whip
         }
 
         // http://stackoverflow.com/questions/3745824/loading-image-into-imagesource-incorrect-width-and-height
-        public static BitmapSource ConvertBitmapTo96DPI(BitmapImage bitmapImage)
+        static BitmapSource ConvertBitmapTo96DPI(BitmapImage bitmapImage)
         {
             double dpi = 96;
             int width = bitmapImage.PixelWidth;

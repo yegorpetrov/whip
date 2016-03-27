@@ -8,7 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 
-namespace Whip
+namespace Whip.Widgets
 {
     class ImageTest : GuiObject
     {
