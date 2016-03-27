@@ -58,6 +58,7 @@
     <Compile Include="Container.cs" />
     <Compile Include="ElementStore.cs" />
     <Compile Include="IXmlConfigurable.cs" />
+    <Compile Include="RelatPanel.cs" />
     <Compile Include="SkinBootstrapper.cs" />
     <Compile Include="WinampXmlReader.cs" />
     <Page Include="MainWindow.xaml">
