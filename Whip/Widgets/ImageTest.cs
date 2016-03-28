@@ -26,7 +26,6 @@ namespace Whip.Widgets
                     Source = ElementStore.GetBitmap(value),
                     Stretch = Stretch.Fill
                 };
-                Name = new string(value.Where(char.IsLetter).ToArray());
             }
             base.ProcessXmlProperty(name, ref value);
         }
