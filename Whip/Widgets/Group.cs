@@ -13,24 +13,38 @@ namespace Whip.Widgets
     class Group : GuiObject
     {
         readonly RelatPanel panel = new RelatPanel();
-        readonly bool isLayout;
+        readonly bool isGroupDef; // layouts are groupdefs too
         string groupId;
         
         public Group(XElement xml) : base(xml)
         {
-            Content = panel;
-            if (xml.Name.LocalName == "layout")
+            var type = xml.Name.LocalName;
+            switch(type.ToLower())
             {
-                isLayout = true;
-                DataContextChanged += (s, e) =>
-                {
-                    InstantiateGroupDef(xml);
-                };
+                case "layout":
+                case "groupdef":
+                    isGroupDef = true;
+                    DataContextChanged += (s, e) =>
+                    {
+                        InstantiateGroupDef(xml);
+                    };
+                    break;
+                case "group":
+                    break;
+                default:
+                    isGroupDef = true;
+                    DataContextChanged += (s, e) =>
+                    {
+                        InstantiateGroupDef(ElementStore.GetGroupDef(type));
+                    };
+                    break;
             }
+            Content = panel;
         }
 
         protected override void ProcessXmlProperty(string name, ref string value)
         {
+            base.ProcessXmlProperty(name, ref value);
             bool get = value == null;
             switch (name)
             {
@@ -39,7 +53,7 @@ namespace Whip.Widgets
                     else
                     {
                         groupId = value;
-                        if (!isLayout)
+                        if (!isGroupDef)
                         {
                             panel.Children.Clear();
                             InstantiateGroupDef(ElementStore.GetGroupDef(value));
@@ -47,7 +61,6 @@ namespace Whip.Widgets
                     }
                     break;
             }
-            base.ProcessXmlProperty(name, ref value);
         }
 
         protected void InstantiateGroupDef(XElement groupdef)

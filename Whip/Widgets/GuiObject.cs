@@ -27,6 +27,13 @@ namespace Whip.Widgets
                     SetXmlProperty(a.Name.LocalName, a.Value);
                 }
             };
+            Xml = xml.ToString();
+        }
+
+        public string Xml
+        {
+            get;
+            private set;
         }
 
         protected ElementStore ElementStore
@@ -97,6 +104,10 @@ namespace Whip.Widgets
                     adapter = simpleInt;
                     dp = RelatPanel.RelatHProperty;
                     break;
+                case "fitparent":
+                    adapter = simpleInt;
+                    dp = RelatPanel.FitParentProperty;
+                    break;
             }
             if (value == null)
             {
@@ -122,7 +133,7 @@ namespace Whip.Widgets
                 default:
                     if ((xui = store.GetGroupDef(type)) != null)
                     {
-                        return new Group(xui);
+                        return new Group(xml);
                     }
                     else
                     {
