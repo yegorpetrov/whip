@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Xml.Linq;
 
 namespace Whip.Widgets
@@ -23,6 +24,11 @@ namespace Whip.Widgets
             }
             result.Content = GuiObject.FromXml(x.Element("layout"), store);
             return result;
+        }
+
+        public Container()
+        {
+            Background = Brushes.Transparent;
         }
 
         public string GetXmlProperty(string name)
