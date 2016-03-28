@@ -12,8 +12,7 @@ namespace Whip
 {
     class ElementStore
     {
-        readonly XDocument xml;
-        readonly string root;
+        readonly XElement xml;
         readonly IDictionary<string, BitmapSource> bitmaps
             = new Dictionary<string, BitmapSource>();
         readonly IDictionary<string, BitmapSource> files
@@ -22,15 +21,16 @@ namespace Whip
             = new Dictionary<string, XElement>();
         bool preloaded;
 
-        public ElementStore(XDocument xml, string root)
+        public ElementStore(XElement xml, string root)
         {
             this.xml = xml;
-            this.root = root;
+            Root = root;
         }
 
-        public XDocument Root
+        public string Root
         {
-            get { return xml; }
+            get;
+            private set;
         }
 
         public ElementStore Next
@@ -42,11 +42,11 @@ namespace Whip
         public void Preload()
         {
             if (preloaded) return;
-            foreach (var entry in xml.Descendants("bitmap"))
+            foreach (var entry in xml.Elements("elements").Elements("bitmap"))
             {
                 bitmaps[entry.Attribute("id").Value] = LoadBitmap(entry);
             }
-            foreach (var entry in xml.Descendants("groupdef"))
+            foreach (var entry in xml.Elements("groupdef"))
             {
                 groupdefs[entry.Attribute("id").Value] = entry;
                 if (entry.Attribute("xuitag") != null)
@@ -62,7 +62,7 @@ namespace Whip
             var result = default(XElement);
             if (!groupdefs.TryGetValue(id, out result) && !preloaded)
             {
-                var entry = xml.Descendants("groupdef")
+                var entry = xml.Elements("groupdef")
                     .FirstOrDefault(b => b.Attribute("id").Value == id);
                 if (entry != null)
                 {
@@ -77,7 +77,7 @@ namespace Whip
             var result = default(BitmapSource);
             if (!bitmaps.TryGetValue(id, out result) && !preloaded)
             {
-                var entry = xml.Descendants("bitmap")
+                var entry = xml.Elements("elements").Elements("bitmap")
                     .FirstOrDefault(b => b.Attribute("id").Value == id);
                 if (entry != null)
                 {
@@ -89,7 +89,7 @@ namespace Whip
 
         private BitmapSource LoadBitmap(XElement entry)
         {
-            var path = Path.Combine(root, entry.Attribute("file").Value);
+            var path = Path.Combine(Root, entry.Attribute("file").Value);
             var file = default(BitmapSource);
             if (!files.TryGetValue(path, out file))
             {

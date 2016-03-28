@@ -15,7 +15,7 @@ namespace Whip.Widgets
         {
             var result = new Container()
             {
-                DataContext = store
+                DataContext = new ElementStore(x, store.Root) { Next = store }
             };
             foreach (var a in x.Attributes())
             {
