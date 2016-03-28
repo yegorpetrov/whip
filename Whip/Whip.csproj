@@ -57,6 +57,7 @@
     </ApplicationDefinition>
     <Compile Include="Widgets\Container.cs" />
     <Compile Include="ElementStore.cs" />
+    <Compile Include="Widgets\Frame.cs" />
     <Compile Include="Widgets\Group.cs" />
     <Compile Include="Widgets\GuiObject.cs" />
     <Compile Include="Widgets\ImageTest.cs" />

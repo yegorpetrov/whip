@@ -130,6 +130,8 @@ namespace Whip.Widgets
                     return new Group(xml);
                 case "grid":
                     return new WGrid(xml);
+                case "wasabiframe":
+                    return new Frame(xml);
                 default:
                     if ((xui = store.GetGroupDef(type)) != null)
                     {
