@@ -142,6 +142,24 @@ namespace Whip
         public static readonly DependencyProperty RelatHProperty =
             DependencyProperty.RegisterAttached("RelatH", typeof(int),
                 typeof(RelatPanel), new PropertyMetadata(0, OnPositionChanged));
+
+
+
+        public static int GetFitParent(DependencyObject obj)
+        {
+            return (int)obj.GetValue(FitParentProperty);
+        }
+
+        public static void SetFitParent(DependencyObject obj, int value)
+        {
+            obj.SetValue(FitParentProperty, value);
+        }
+
+        public static readonly DependencyProperty FitParentProperty =
+            DependencyProperty.RegisterAttached("FitParent", typeof(int),
+                typeof(RelatPanel), new PropertyMetadata(0, OnPositionChanged));
+
+
         #endregion
 
         protected override Size MeasureOverride(Size availableSize)
@@ -185,7 +203,15 @@ namespace Whip
                     rw = GetRelatW(child),
                     rh = GetRelatH(child),
                     pw = (int)Math.Round(finalSize.Width),
-                    ph = (int)Math.Round(finalSize.Height);
+                    ph = (int)Math.Round(finalSize.Height),
+                    fp = GetFitParent(child);
+
+                if (fp == 1)
+                {
+                    x = y = w = h = 0;
+                    rx = ry = 0;
+                    rw = rh = 1;
+                }
 
                 child.Arrange(new Rect(
                     calcRelat(pw, x, rx),
