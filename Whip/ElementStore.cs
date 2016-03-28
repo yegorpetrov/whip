@@ -25,6 +25,7 @@ namespace Whip
         {
             this.xml = xml;
             Root = root;
+            Preload();
         }
 
         public string Root
@@ -136,6 +137,7 @@ namespace Whip
         // http://stackoverflow.com/questions/3745824/loading-image-into-imagesource-incorrect-width-and-height
         static BitmapSource ConvertBitmapTo96DPI(BitmapImage bitmapImage)
         {
+            if ((int)Math.Round(bitmapImage.DpiX) == 96) return bitmapImage;
             double dpi = 96;
             int width = bitmapImage.PixelWidth;
             int height = bitmapImage.PixelHeight;
