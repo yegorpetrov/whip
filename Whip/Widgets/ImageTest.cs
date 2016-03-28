@@ -12,11 +12,9 @@ namespace Whip.Widgets
 {
     class ImageTest : GuiObject
     {
-        ElementStore store;
-        
-        public static new ImageTest FromXml(XElement xml, ElementStore store)
+        public ImageTest(XElement xml) : base(xml)
         {
-            return new ImageTest() { store = store };
+
         }
 
         protected override void ProcessXmlProperty(string name, ref string value)
@@ -25,7 +23,7 @@ namespace Whip.Widgets
             {
                 Content = new Image()
                 {
-                    Source = store.GetBitmap(value),
+                    Source = ElementStore.GetBitmap(value),
                     Stretch = Stretch.Fill
                 };
                 Name = new string(value.Where(char.IsLetter).ToArray());

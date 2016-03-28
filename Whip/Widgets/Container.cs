@@ -13,7 +13,10 @@ namespace Whip.Widgets
     {
         public static Container FromXml(XElement x, ElementStore store)
         {
-            var result = new Container();
+            var result = new Container()
+            {
+                DataContext = store
+            };
             foreach (var a in x.Attributes())
             {
                 result.SetXmlProperty(a.Name.LocalName, a.Value);

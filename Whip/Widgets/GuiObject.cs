@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 using Whip.XmlAdapter;
 
@@ -16,6 +17,22 @@ namespace Whip.Widgets
             byteToDouble01 = new ByteTo01Adapter(),
             simpleInt = new IntegerAdapter(),
             bool2vis = new BooleanVisibilityAdapter();
+
+        public GuiObject(XElement xml)
+        {
+            DataContextChanged += (s, e) =>
+            {
+                foreach (var a in xml.Attributes())
+                {
+                    SetXmlProperty(a.Name.LocalName, a.Value);
+                }
+            };
+        }
+
+        protected ElementStore ElementStore
+        {
+            get { return DataContext as ElementStore; }
+        }
 
         public string GetXmlProperty(string name)
         {
@@ -95,39 +112,23 @@ namespace Whip.Widgets
         {
             var type = xml.Name.LocalName;
             var xui = default(XElement);
-            var result = default(GuiObject);
             switch (type.ToLower())
             {
                 case "group":
-                    result = Group.FromGroupdef(
-                        store.GetGroupDef(xml.Attribute("id").Value), store);
-                    break;
                 case "layout":
-                    result = Group.FromGroupdef(xml, store);
-                    break;
+                    return new Group(xml);
                 case "grid":
-                    result = WGrid.FromXml(xml, store);
-                    break;
+                    return new WGrid(xml);
                 default:
                     if ((xui = store.GetGroupDef(type)) != null)
                     {
-                        result = Group.FromGroupdef(
-                        store.GetGroupDef(type), store);
+                        return new Group(xui);
                     }
                     else
                     {
-                        result = ImageTest.FromXml(xml, store);
+                        return new ImageTest(xml);
                     }
-                    break;
             }
-            if (result != null)
-            {
-                foreach (var a in xml.Attributes())
-                {
-                    result.SetXmlProperty(a.Name.LocalName, a.Value);
-                }
-            }
-            return result;
         }
     }
 }

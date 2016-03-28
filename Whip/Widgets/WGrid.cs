@@ -23,7 +23,7 @@ namespace Whip.Widgets
             bottom = new Image() { Stretch = Stretch.Fill },
             bottomright = new Image();
 
-        public WGrid()
+        public WGrid(XElement xml) : base(xml)
         {
             var grid = new Grid();
             foreach (var row in new[]
@@ -66,27 +66,22 @@ namespace Whip.Widgets
 
         }
 
-        public static new WGrid FromXml(XElement xml, ElementStore store)
+        protected override void ProcessXmlProperty(string name, ref string value)
         {
-            Action<Image, string> setBitmap = (i, b) =>
+            // TODO handle get
+            switch (name)
             {
-                if (xml.Attribute(b) != null)
-                {
-                    i.Source = store.GetBitmap(xml.Attribute(b).Value);
-                }
-            };
-            var grid = new WGrid();
-            setBitmap(grid.topleft,     "topleft");
-            setBitmap(grid.top,         "top");
-            setBitmap(grid.topright,    "topright");
-            setBitmap(grid.left,        "left");
-            setBitmap(grid.middle,      "middle");
-            setBitmap(grid.right,       "right");
-            setBitmap(grid.bottomleft,  "bottomleft");
-            setBitmap(grid.bottom,      "bottom");
-            setBitmap(grid.bottomright, "bottomright");
-            return grid;
-
+                case "topleft": topleft.Source = ElementStore.GetBitmap(value); break;
+                case "top": top.Source = ElementStore.GetBitmap(value); break;
+                case "topright": topright.Source = ElementStore.GetBitmap(value); break;
+                case "left": left.Source = ElementStore.GetBitmap(value); break;
+                case "middle": middle.Source = ElementStore.GetBitmap(value); break;
+                case "right": right.Source = ElementStore.GetBitmap(value); break;
+                case "bottomleft": bottomleft.Source = ElementStore.GetBitmap(value); break;
+                case "bottom": bottom.Source = ElementStore.GetBitmap(value); break;
+                case "bottomright": bottomright.Source = ElementStore.GetBitmap(value); break;
+            }
+            base.ProcessXmlProperty(name, ref value);
         }
     }
 }
