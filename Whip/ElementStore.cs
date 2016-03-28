@@ -49,6 +49,10 @@ namespace Whip
             foreach (var entry in xml.Descendants("groupdef"))
             {
                 groupdefs[entry.Attribute("id").Value] = entry;
+                if (entry.Attribute("xuitag") != null)
+                {
+                    groupdefs[entry.Attribute("xuitag").Value.Replace(":", "")] = entry;
+                }
             }
             preloaded = true;
         }

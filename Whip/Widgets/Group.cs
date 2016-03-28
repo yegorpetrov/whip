@@ -19,18 +19,14 @@ namespace Whip.Widgets
             Content = panel;
         }
 
-        public static new Group FromXml(XElement xml, ElementStore store)
+        public static Group FromGroupdef(XElement groupdef, ElementStore store)
         {
-            var xdef = xml.Name.LocalName == "layout" ?
-                xml :
-                store.GetGroupDef(xml.Attribute("id").Value);
-
-            if (xdef == null) return null;
+            if (groupdef == null) return null;
 
             var group = new Group();
-            foreach (var e in xdef
+            foreach (var e in groupdef
                 .Elements()
-                .Select(x => GuiObject.FromXml(x, store))
+                .Select(x => FromXml(x, store))
                 .Where(g => g != null))
             {
                 group.panel.Children.Add(e);

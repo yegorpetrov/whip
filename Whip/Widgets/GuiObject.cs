@@ -93,15 +93,28 @@ namespace Whip.Widgets
 
         public static GuiObject FromXml(XElement xml, ElementStore store)
         {
+            var type = xml.Name.LocalName;
+            var xui = default(XElement);
             var result = default(GuiObject);
-            switch (xml.Name.LocalName.ToLower())
+            switch (type.ToLower())
             {
                 case "group":
+                    result = Group.FromGroupdef(
+                        store.GetGroupDef(xml.Attribute("id").Value), store);
+                    break;
                 case "layout":
-                    result = Group.FromXml(xml, store);
+                    result = Group.FromGroupdef(xml, store);
                     break;
                 default:
-                    result = ImageTest.FromXml(xml, store);
+                    if ((xui = store.GetGroupDef(type)) != null)
+                    {
+                        result = Group.FromGroupdef(
+                        store.GetGroupDef(type), store);
+                    }
+                    else
+                    {
+                        result = ImageTest.FromXml(xml, store);
+                    }
                     break;
             }
             if (result != null)
