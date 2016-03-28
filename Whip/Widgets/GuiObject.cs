@@ -105,6 +105,9 @@ namespace Whip.Widgets
                 case "layout":
                     result = Group.FromGroupdef(xml, store);
                     break;
+                case "grid":
+                    result = WGrid.FromXml(xml, store);
+                    break;
                 default:
                     if ((xui = store.GetGroupDef(type)) != null)
                     {

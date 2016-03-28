@@ -63,6 +63,7 @@
     <Compile Include="IXmlConfigurable.cs" />
     <Compile Include="RelatPanel.cs" />
     <Compile Include="SkinBootstrapper.cs" />
+    <Compile Include="Widgets\WGrid.cs" />
     <Compile Include="WinampXmlReader.cs" />
     <Compile Include="XmlAdapter\ByteTo01Adapter.cs" />
     <Compile Include="XmlAdapter\IntegerAdapter.cs" />
