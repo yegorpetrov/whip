@@ -8,14 +8,12 @@ using System.Threading.Tasks;
 
 namespace Whip.Scripting
 {
-    public class VCPU
+    public partial class VCPU
     {
+        const BindingFlags CallFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance;
         readonly ScriptContext ctx;
-        readonly Type[] types;
-        readonly string[] calls;
         readonly MethodInfo[] methods;
-        readonly EventInfo[] events;
-        readonly object[] objects;
+        readonly ScriptObjectStore objects;
         readonly byte[] code;
 
         readonly ScriptStack<dynamic> stack = new ScriptStack<dynamic>();
@@ -26,22 +24,60 @@ namespace Whip.Scripting
             using (var reader = new ScriptReader(exe))
             {
                 reader.ReadHeader();
-                var guids = reader.ReadTypeTable().ToArray();
-                calls = reader.ReadCallTable().Select(t => t.Item2).ToArray();
-                objects = reader.ReadObjectTable(guids).ToArray();
-                reader.ReadStringTable().ForEach(s => objects[s.Item1] = s.Item2);
-                var listeners = reader.ReadListenerTable().ToArray();
-                code = reader.ReadBytecode();
 
-                for (int i = 0; i < objects.Length; i++)
+                var guids = reader
+                    .ReadTypeTable()
+                    .ToArray();
+
+                var calls = reader
+                    .ReadCallTable()
+                    .Select(
+                        c => new
+                        {
+                            TypeIdx = c.Item1,
+                            Name = c.Item2
+                        })
+                    .ToArray();
+
+                objects = new ScriptObjectStore(
+                    reader.ReadObjectTable(guids),
+                    reader.ReadStringTable());
+
+                for (int i = 0, _i = objects.Count(); i < _i; i++)
                 {
                     if (objects[i] is Guid) objects[i] = ctx.GetStaticObject((Guid)objects[i]);
                 }
 
-                //types = ctx.ResolveTypes(guids).ToArray();
-                //var flags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance;
-                //methods = calls.Select(c => types[c.Item1].GetMethod(c.Item2, flags)).ToArray();
-                //events = calls.Select(c => types[c.Item1].GetEvent(c.Item2, flags)).ToArray();
+                var listeners = reader
+                    .ReadListenerTable()
+                    .Select(
+                        l => new
+                        {
+                            Obj = l.Item1,
+                            Call = l.Item2,
+                            Offset = l.Item3
+                        })
+                    .ToArray();
+
+                code = reader.ReadBytecode();
+
+                var types = guids
+                    .Select(ctx.ResolveType)
+                    .ToArray();
+
+                methods = calls
+                    .Select(c => types[c.TypeIdx].GetMethod(c.Name, CallFlags))
+                    .ToArray();
+                
+                objects.CreateListeners(listeners.Select(l =>
+                {
+                    var typeIdx = calls[l.Call].TypeIdx;
+                    var callName = calls[l.Call].Name;
+                    var evi = types[typeIdx].GetEvent(callName, CallFlags);
+                    return new Tuple<int, EventInfo, Delegate>(
+                        l.Obj, evi, CreateEventHandler(evi, l.Offset, this)
+                        );
+                }));
             }
         }
 
@@ -87,11 +123,14 @@ namespace Whip.Scripting
                     case opc.callint: throw new NotImplementedException();
                     case opc.callext2:
                         {
-                            var call = calls[arg32()];
+                            var call = methods[arg32()];
                             var nargs = arg8();
-                            var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop()).ToArray();
-                            stack.Push((stack.Pop() as IScriptable).ScriptMethod(call, args)); break;
+                            var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
+                            var expected = call.GetParameters().Select(p => p.ParameterType);
+                            args = args.Zip(expected, (a, b) => (a is int && b == typeof(bool)) ? Convert.ToBoolean(a) : a).ToArray();
+                            stack.Push(call.Invoke(stack.Pop(), args.ToArray()));
                         }
+                        break;
                     case opc.ret: return;
                     case opc.stop: break; //TODO
                     case opc.set: stack.SetRHS(objects); break;

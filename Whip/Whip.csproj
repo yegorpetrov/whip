@@ -61,10 +61,12 @@
     </ApplicationDefinition>
     <Compile Include="Scripting\IScriptable.cs" />
     <Compile Include="Scripting\ScriptContext.cs" />
+    <Compile Include="Scripting\ScriptObjectStore.cs" />
     <Compile Include="Scripting\ScriptReader.cs" />
     <Compile Include="Scripting\ScriptStack.cs" />
     <Compile Include="Scripting\ScriptUtil.cs" />
     <Compile Include="Scripting\VCPU.cs" />
+    <Compile Include="Scripting\VCPU_EventHandling.cs" />
     <Compile Include="Widgets\Container.cs" />
     <Compile Include="ElementStore.cs" />
     <Compile Include="Widgets\Frame.cs" />

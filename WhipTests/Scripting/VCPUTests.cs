@@ -9,32 +9,54 @@ using System.IO;
 
 namespace Whip.Scripting.Tests
 {
-    class DummyCtx : ScriptContext, IScriptable
+    class DummyCtx : ScriptContext
     {
+        public static DummyCtx Instance = new DummyCtx();
+
         IDictionary<Guid, Type> typeMap = new Dictionary<Guid, Type>();
 
         public DummyCtx()
         {
             typeMap[new Guid("D6F50F64-93FA-49b7-93F1-BA66EFAE3E98")] = typeof(DummyCtx);
+            typeMap[new Guid("51654971-0D87-4a51-91E3-A6B53235F3E7")] = typeof(DummyCtx);
         }
 
         public event EventHandler<ScriptEventArgs> ScriptEvent;
 
         public override object GetStaticObject(Guid g)
         {
-            return Activator.CreateInstance(typeMap[g]);
+            return Instance;
         }
 
-        public object ScriptMethod(string name, object[] args)
+        public override Type ResolveType(Guid g)
         {
-            switch (name)
-            {
-                case "Assert":
-                    Assert.IsTrue(Convert.ToBoolean(args[0]));
-                    break;
-            }
-            return null;
+            return typeMap[g];
         }
+
+        public void TestAssert(bool b)
+        {
+            Console.WriteLine(b);
+        }
+
+        public void Test(int x, int y)
+        {
+            Console.WriteLine(x);
+            Console.WriteLine(y);
+        }
+
+        public void Test0()
+        {
+            Console.WriteLine();
+        }
+
+        public void DoOnStart()
+        {
+            //OnStart?.Invoke();
+            OnEvent?.Invoke(3, 24, 78);
+        }
+
+        public event Action OnStart;
+        public event Action<int, int, int> OnEvent;
     }
 
     [TestClass()]
@@ -43,10 +65,10 @@ namespace Whip.Scripting.Tests
         [TestMethod()]
         public void VCPUTest()
         {
-            var ctx = new DummyCtx();
             var file = @"E:\testdata\winamp\scripts\case1.maki";
-            var cpu = new VCPU(File.ReadAllBytes(file), ctx);
-            cpu.Run();
+            var cpu = new VCPU(File.ReadAllBytes(file), DummyCtx.Instance);
+            DummyCtx.Instance.DoOnStart();
+            //cpu.Run();
             Assert.Fail();
         }
     }

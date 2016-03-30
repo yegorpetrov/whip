@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Whip.Scripting
 {
-    class ScriptStack<T> : Stack<T>
+    class ScriptStack<T> : Stack<T> where T : class
     {
         readonly int[] index = new int[64];
 
@@ -20,12 +20,12 @@ namespace Whip.Scripting
             Push(f(Pop()));
         }
 
-        public void PushN(T[] collection, int idx)
+        public void PushN(ScriptObjectStore collection, int idx)
         {
-            Push(collection[index[Count + 1] = idx]);
+            Push(collection[index[Count + 1] = idx] as T);
         }
 
-        public void SetRHS(T[] collection)
+        public void SetRHS(ScriptObjectStore collection)
         {
             var rhs = Pop();
             Pop();

@@ -8,6 +8,7 @@ namespace Whip.Scripting
 {
     public abstract class ScriptContext
     {
+        public abstract Type ResolveType(Guid g);
         public abstract object GetStaticObject(Guid guid);
     }
 }
