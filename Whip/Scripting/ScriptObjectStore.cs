@@ -54,5 +54,14 @@ namespace Whip.Scripting
                 objects[i] = value;
             }
         }
+
+        public void Unsubscribe()
+        {
+            if (handlers == null) return;
+            foreach (var h in handlers)
+            {
+                h.Item2.RemoveEventHandler(objects[h.Item1], h.Item3);
+            }
+        }
     }
 }

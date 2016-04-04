@@ -78,7 +78,19 @@ namespace Whip.Scripting
                         l.Obj, evi, CreateEventHandler(evi, l.Offset, this)
                         );
                 }));
+
+                // We have init section
+                int min;
+                if (listeners.Any() && (min = listeners.Min(l => l.Offset)) > 0)
+                {
+                    ExecuteAndStop(0, min);
+                }
             }
+        }
+
+        public void Unsubscribe()
+        {
+            objects.Unsubscribe();
         }
 
         public void Run()
@@ -86,7 +98,9 @@ namespace Whip.Scripting
             Execute(0);
         }
 
-        void Execute(int offset)
+        void Execute(int offset) => ExecuteAndStop(offset, int.MaxValue);
+
+        void ExecuteAndStop(int offset, int stop)
         {
             Func<int> arg32 = () =>
             {
@@ -102,7 +116,7 @@ namespace Whip.Scripting
                 return result;
             };
 
-            while (true)
+            while (offset < stop)
             {
                 switch ((opc)code[offset])
                 {
