@@ -80,11 +80,7 @@ namespace Whip.Scripting
                 }));
 
                 // We have init section
-                int min;
-                if (listeners.Any() && (min = listeners.Min(l => l.Offset)) > 0)
-                {
-                    ExecuteAndStop(0, min);
-                }
+                ExecuteAndStop(0, listeners.Min(l => l.Offset));
             }
         }
 
@@ -116,9 +112,10 @@ namespace Whip.Scripting
                 return result;
             };
 
+            opc op;
             while (offset < stop)
             {
-                switch ((opc)code[offset])
+                switch (op = (opc)code[offset])
                 {
                     case opc.nop: break;
                     case opc.push: stack.PushN(objects, arg32()); break;
@@ -130,9 +127,21 @@ namespace Whip.Scripting
                     case opc.cmpge: stack.Pop2Push1((a, b) => a <= b); break;
                     case opc.cmpl: stack.Pop2Push1((a, b) => a > b); break;
                     case opc.cmple: stack.Pop2Push1((a, b) => a >= b); break;
-                    case opc.jiz: var n = Convert.ToBoolean(stack.Pop()) ? 0 : arg32(); offset += n; break;
-                    case opc.jnz: n = Convert.ToBoolean(stack.Pop()) ? arg32() : 0; offset += n; break;
-                    case opc.jmp: offset += arg32(); break;
+                    case opc.jiz:
+                    case opc.jnz:
+                        {
+                            var sw = Convert.ToBoolean(stack.Pop());
+                            var jmp = arg32();
+                            if (op == opc.jnz) offset += sw ? jmp : 0;
+                            else offset += sw ? 0 : jmp;
+                        }
+                        break;
+                    case opc.jmp:
+                        {
+                            var jmp = arg32();
+                            offset += jmp;
+                        }
+                        break;
                     case opc.callext: throw new NotImplementedException();
                     case opc.callint: throw new NotImplementedException();
                     case opc.callext2:
