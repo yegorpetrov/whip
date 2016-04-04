@@ -1,0 +1,26 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ output extension=".cs" #>
+
+using System;
+using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Whip.Scripting.Tests
+{
+	[TestClass()]
+	public class ScriptTestsDirectory
+	{
+<#
+var d = @"c:\Yegor\testdata\scripts\test\";
+foreach (var t in Directory.EnumerateFiles(d, "*.maki"))
+{
+	WriteLine(string.Format("\t\t[TestMethod] public void {0}() => TestUtil.RunScript(@\"{1}\");", Path.GetFileNameWithoutExtension(t), t));
+}
+#>
+	}
+}

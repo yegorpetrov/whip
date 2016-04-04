@@ -46,12 +46,21 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripting\ScriptAssert.cs" />
+    <Compile Include="Scripting\ScriptsDir.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScriptsDir.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Scripting\TestUtil.cs" />
     <Compile Include="Scripting\VCPUTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +68,15 @@
       <Project>{C3B35A71-57F5-4919-9609-EE7FA5098EE4}</Project>
       <Name>Whip</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripting\ScriptsDir.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ScriptsDir.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
