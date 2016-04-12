@@ -10,7 +10,11 @@ namespace Whip.Scripting
 {
     public partial class VCPU
     {
-        const BindingFlags CallFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance;
+        const BindingFlags CallFlags =
+            BindingFlags.IgnoreCase |
+            BindingFlags.Public |
+            BindingFlags.Instance;
+
         readonly ScriptContext ctx;
         readonly Type[] types;
         readonly MethodInfo[] methods;
@@ -67,14 +71,19 @@ namespace Whip.Scripting
                     .ToArray();
 
                 methods = calls
-                    .Select(c => types[c.TypeIdx].GetMethod(c.Name, CallFlags))
+                    .Select(c =>
+                        types[c.TypeIdx].GetMethod(c.Name, CallFlags) ??
+                        types[c.TypeIdx].GetMethod(
+                            ScriptUtil.TranslateGetterSetter(c.Name), CallFlags))
                     .ToArray();
 
                 objects.CreateListeners(listeners.Select(l =>
                 {
                     var typeIdx = calls[l.Call].TypeIdx;
                     var callName = calls[l.Call].Name;
-                    var evi = types[typeIdx].GetEvent(callName, CallFlags);
+                    var evi = types[typeIdx].GetEvent(callName, CallFlags) ??
+                        types[typeIdx].GetEvent(
+                            ScriptUtil.TranslateEvent(callName), CallFlags);
                     return new Tuple<int, EventInfo, Delegate>(
                         l.Obj, evi, CreateEventHandler(evi, l.Offset, this)
                         );
