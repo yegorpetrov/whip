@@ -8,8 +8,8 @@ namespace Whip.Scripting
 {
     class ScriptStack<T> : Stack<T> where T : class
     {
-        readonly int[] index = new int[64];
-        
+        readonly IDictionary<int, int> positions = new Dictionary<int, int>();
+
         public void Pop2Push1(Func<T, T, T> f)
         {
             Push(f(Pop(), Pop()));
@@ -22,12 +22,12 @@ namespace Whip.Scripting
 
         public void PushN(ScriptObjectStore collection, int idx)
         {
-            Push(collection[index[Count + 1] = idx] as T);
+            Push(collection[positions[Count + 1] = idx] as T);
         }
 
         public void SaveTop(ScriptObjectStore collection)
         {
-            collection[index[Count]] = Peek();
+            collection[positions[Count]] = Peek();
         }
     }
 }
