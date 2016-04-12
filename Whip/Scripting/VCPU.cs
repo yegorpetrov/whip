@@ -225,7 +225,7 @@ namespace Whip.Scripting
             jmp = 0x12, // Jump unconditionally
             callext = 0x18, // Call external (e.g. System.play())
             callint = 0x19, // Call internal (e.g. myFunc())
-            callext2 = 0x70, // Same as cext but with 5 bytes long argument
+            callext2 = 0x70, // Same as cext but with nargs byte
             ret = 0x21, // return (value left in the stack)
             stop = 0x28, // Break event handling chain (“complete”)
             set = 0x30, // A = B
