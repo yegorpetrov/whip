@@ -69,7 +69,7 @@ namespace Whip.Scripting
                 methods = calls
                     .Select(c => types[c.TypeIdx].GetMethod(c.Name, CallFlags))
                     .ToArray();
-                
+
                 objects.CreateListeners(listeners.Select(l =>
                 {
                     var typeIdx = calls[l.Call].TypeIdx;
@@ -143,8 +143,22 @@ namespace Whip.Scripting
                             offset += jmp;
                         }
                         break;
-                    case opc.callext: throw new NotImplementedException();
-                    case opc.callint: throw new NotImplementedException();
+                    case opc.callext:
+                        {
+                            var call = methods[arg32()];
+                            var nargs = call.GetParameters().Count();
+                            var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
+                            var expected = call.GetParameters().Select(p => p.ParameterType);
+                            args = args.Zip(expected, (a, b) => (a is int && b == typeof(bool)) ? Convert.ToBoolean(a) : a).ToArray();
+                            stack.Pop1Push1(t => call.Invoke(t, args.ToArray()));
+                        }
+                        break;
+                    case opc.callint:
+                        {
+                            var f = arg32();
+                            ExecuteAndStop(f + offset + 1, int.MaxValue);
+                        }
+                        break;
                     case opc.callext2:
                         {
                             var call = methods[arg32()];
