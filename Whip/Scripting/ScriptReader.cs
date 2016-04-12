@@ -97,7 +97,7 @@ namespace Whip.Scripting
                 }
                 else
                 {
-                    yield return guids[typeIdx];
+                    yield return isSystem ? (object)guids[typeIdx] : null;
                 }
             }
         }

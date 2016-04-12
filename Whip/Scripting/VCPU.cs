@@ -41,8 +41,8 @@ namespace Whip.Scripting
                     .ToArray();
 
                 objects = new ScriptObjectStore(
-                    reader.ReadObjectTable(guids),
-                    reader.ReadStringTable());
+                    reader.ReadObjectTable(guids).ToArray(),
+                    reader.ReadStringTable().ToArray());
 
                 for (int i = 0, _i = objects.Count(); i < _i; i++)
                 {
@@ -152,7 +152,7 @@ namespace Whip.Scripting
                             var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
                             var expected = call.GetParameters().Select(p => p.ParameterType);
                             args = args.Zip(expected, (a, b) => (a is int && b == typeof(bool)) ? Convert.ToBoolean(a) : a).ToArray();
-                            stack.Push(call.Invoke(stack.Pop(), args.ToArray()));
+                            stack.Pop1Push1(t => call.Invoke(t, args.ToArray()));
                         }
                         break;
                     case opc.ret: return;
@@ -178,7 +178,7 @@ namespace Whip.Scripting
                     case opc.shl: stack.Pop2Push1((a, b) => b << a); break;
                     case opc.shr: stack.Pop2Push1((a, b) => b >> a); break;
                     case opc.inst: stack.Push(Activator.CreateInstance(types[arg32()])); break;
-                    case opc.del: throw new NotImplementedException();
+                    case opc.del: stack.DeleteTop(objects); break;
                     case opc.umv: throw new NotImplementedException();
                 }
                 offset++;

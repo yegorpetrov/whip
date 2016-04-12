@@ -29,5 +29,11 @@ namespace Whip.Scripting
         {
             collection[positions[Count]] = Peek();
         }
+
+        public void DeleteTop(ScriptObjectStore collection)
+        {
+            (Pop() as IDisposable)?.Dispose();
+            Push(null);
+        }
     }
 }

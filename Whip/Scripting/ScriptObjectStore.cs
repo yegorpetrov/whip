@@ -44,7 +44,7 @@ namespace Whip.Scripting
             set
             {
                 if (handlers != null)
-                {
+                { 
                     foreach (var h in handlers.Where(h => h.Item1 == i))
                     {
                         if (objects[i] != null) h.Item2.RemoveEventHandler(objects[i], h.Item3);
