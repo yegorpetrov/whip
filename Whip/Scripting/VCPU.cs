@@ -12,6 +12,7 @@ namespace Whip.Scripting
     {
         const BindingFlags CallFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance;
         readonly ScriptContext ctx;
+        readonly Type[] types;
         readonly MethodInfo[] methods;
         readonly ScriptObjectStore objects;
         readonly byte[] code;
@@ -61,7 +62,7 @@ namespace Whip.Scripting
 
                 code = reader.ReadBytecode();
 
-                var types = guids
+                types = guids
                     .Select(ctx.ResolveType)
                     .ToArray();
 
@@ -176,7 +177,7 @@ namespace Whip.Scripting
                     case opc.or: stack.Pop2Push1((a, b) => a || b); break;
                     case opc.shl: stack.Pop2Push1((a, b) => b << a); break;
                     case opc.shr: stack.Pop2Push1((a, b) => b >> a); break;
-                    case opc.inst: throw new NotImplementedException();
+                    case opc.inst: stack.Push(Activator.CreateInstance(types[arg32()])); break;
                     case opc.del: throw new NotImplementedException();
                     case opc.umv: throw new NotImplementedException();
                 }
