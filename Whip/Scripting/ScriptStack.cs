@@ -9,7 +9,7 @@ namespace Whip.Scripting
     class ScriptStack<T> : Stack<T> where T : class
     {
         readonly int[] index = new int[64];
-
+        
         public void Pop2Push1(Func<T, T, T> f)
         {
             Push(f(Pop(), Pop()));
@@ -25,12 +25,9 @@ namespace Whip.Scripting
             Push(collection[index[Count + 1] = idx] as T);
         }
 
-        public void SetRHS(ScriptObjectStore collection)
+        public void SaveTop(ScriptObjectStore collection)
         {
-            var rhs = Pop();
-            Pop();
-            Push(rhs);
-            collection[index[Count]] = rhs;
+            collection[index[Count]] = Peek();
         }
     }
 }

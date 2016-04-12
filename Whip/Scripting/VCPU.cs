@@ -156,11 +156,11 @@ namespace Whip.Scripting
                         break;
                     case opc.ret: return;
                     case opc.stop: break; //TODO
-                    case opc.set: stack.SetRHS(objects); break;
-                    case opc.incs: throw new NotImplementedException();
-                    case opc.decs: throw new NotImplementedException();
-                    case opc.incp: throw new NotImplementedException();
-                    case opc.decp: throw new NotImplementedException();
+                    case opc.set: stack.Pop2Push1((p1, p2) => p1); stack.SaveTop(objects); break;
+                    case opc.incs: stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(objects); break;
+                    case opc.decs: stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(objects); break;
+                    case opc.incp: stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(objects); break;
+                    case opc.decp: stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(objects); break;
                     case opc.add: stack.Pop2Push1((a, b) => b + a); break;
                     case opc.sub: stack.Pop2Push1((a, b) => b - a); break;
                     case opc.mul: stack.Pop2Push1((a, b) => b * a); break;
