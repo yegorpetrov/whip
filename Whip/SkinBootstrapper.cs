@@ -11,7 +11,7 @@ namespace Whip
 {
     class SkinBootstrapper
     {
-        const string root = @"e:\testdata\winamp\Winamp3\";
+        const string root = @"c:\Yegor\testdata\winamp\Big Bento\";
         const string root2 = @"c:\Program Files (x86)\Winamp\Plugins\freeform\xml\";
         static readonly ElementStore environment;
 
@@ -43,12 +43,11 @@ namespace Whip
                 var path = Path.Combine(root2, e);
                 var wxr = new WinampXmlReader(path);
                 var es = new ElementStore(
-                    XDocument.Load(wxr),
+                    XDocument.Load(wxr).Elements().First(),
                     Path.GetDirectoryName(path))
                 {
                     Next = environment
                 };
-                es.Preload();
                 environment = es;
             }
         }
@@ -58,7 +57,7 @@ namespace Whip
             var reader = new WinampXmlReader(Path.Combine(root, "skin.xml"));
             var skin = XDocument.Load(reader);
 
-            var store = new ElementStore(skin, root)
+            var store = new ElementStore(skin.Elements().First(), root)
             {
                 Next = environment
             };

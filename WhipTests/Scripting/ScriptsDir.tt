@@ -16,7 +16,7 @@ namespace Whip.Scripting.Tests
 	public class ScriptTestsDirectory
 	{
 <#
-var d = @"c:\Yegor\testdata\scripts\test\";
+var d = @"e:\testdata\winamp\scripts\test\";
 foreach (var t in Directory.EnumerateFiles(d, "*.maki"))
 {
 	WriteLine(string.Format("\t\t[TestMethod] public void {0}() => TestUtil.RunScript(@\"{1}\");", Path.GetFileNameWithoutExtension(t), t));
