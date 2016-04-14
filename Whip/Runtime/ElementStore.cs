@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 
-namespace Whip
+namespace Whip.Runtime
 {
     class ElementStore
     {
@@ -38,6 +38,26 @@ namespace Whip
         {
             get;
             set;
+        }
+
+        public System System
+        {
+            get
+            {
+                return System.Instance;
+            }
+        }
+
+        public byte[] FindScript(string file)
+        {
+            try
+            {
+                return File.ReadAllBytes(Path.Combine(Root, file));
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
         }
 
         public void Preload()

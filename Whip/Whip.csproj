@@ -59,6 +59,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Runtime\System.cs" />
+    <Compile Include="Runtime\System.maki.cs" />
     <Compile Include="Scripting\IScriptable.cs" />
     <Compile Include="Scripting\IScriptContext.cs" />
     <Compile Include="Scripting\ScriptObjectStore.cs" />
@@ -68,7 +70,7 @@
     <Compile Include="Scripting\VCPU.cs" />
     <Compile Include="Scripting\VCPU_EventHandling.cs" />
     <Compile Include="Widgets\Container.cs" />
-    <Compile Include="ElementStore.cs" />
+    <Compile Include="Runtime\ElementStore.cs" />
     <Compile Include="Widgets\Frame.cs" />
     <Compile Include="Widgets\Group.cs" />
     <Compile Include="Widgets\GuiObject.cs" />

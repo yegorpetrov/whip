@@ -72,8 +72,8 @@ namespace Whip.Scripting
 
                 methods = calls
                     .Select(c =>
-                        types[c.TypeIdx].GetMethod(c.Name, CallFlags) ??
-                        types[c.TypeIdx].GetMethod(
+                        types[c.TypeIdx]?.GetMethod(c.Name, CallFlags) ??
+                        types[c.TypeIdx]?.GetMethod(
                             ScriptUtil.TranslateGetterSetter(c.Name), CallFlags))
                     .ToArray();
 

@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Xml.Linq;
+using Whip.Scripting;
 
 namespace Whip.Widgets
 {
@@ -70,6 +71,11 @@ namespace Whip.Widgets
             {
                 panel.Children.Add(go);
             }
-        }
+            foreach (var xscript in groupdef.Elements("script"))
+            {
+                var file = xscript.Attribute("file")?.Value ?? string.Empty;
+                var script = ElementStore.System.LoadScript(ElementStore.FindScript(file), this);
+            }
+        }        
     }
 }

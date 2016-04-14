@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
+using Whip.Runtime;
 using Whip.XmlAdapter;
 
 namespace Whip.Widgets
