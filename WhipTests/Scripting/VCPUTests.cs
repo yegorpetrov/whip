@@ -40,5 +40,11 @@ namespace Whip.Scripting.Tests
         {
             Main?.Invoke();
         }
+
+        [NeedsContext]
+        public object GetScriptGroup(IScriptContext ctx)
+        {
+            return ctx;
+        }
     }
 }

@@ -11,4 +11,9 @@ namespace Whip.Scripting
         Type ResolveType(Guid g);
         object GetStaticObject(Guid guid);
     }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class NeedsContextAttribute : Attribute
+    {
+    }
 }
