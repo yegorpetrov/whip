@@ -15,7 +15,7 @@ namespace Whip.Scripting
             BindingFlags.Public |
             BindingFlags.Instance;
 
-        readonly ScriptContext ctx;
+        readonly IScriptContext ctx;
         readonly Type[] types;
         readonly MethodInfo[] methods;
         readonly ScriptObjectStore objects;
@@ -23,7 +23,7 @@ namespace Whip.Scripting
 
         readonly ScriptStack<dynamic> stack = new ScriptStack<dynamic>();
         
-        public VCPU(byte[] exe, ScriptContext ctx)
+        public VCPU(byte[] exe, IScriptContext ctx)
         {
             this.ctx = ctx;
             using (var reader = new ScriptReader(exe))
@@ -131,8 +131,8 @@ namespace Whip.Scripting
                     case opc.push: stack.PushN(objects, arg32()); break;
                     case opc.popi: stack.Pop(); break;
                     case opc.pop: objects[arg32()] = stack.Pop(); break;
-                    case opc.cmpeq: stack.Pop2Push1((a, b) => a.Equals(b)); break;
-                    case opc.cmpne: stack.Pop2Push1((a, b) => !a.Equals(b)); break;
+                    case opc.cmpeq: stack.Pop2Push1((a, b) => a == b); break;
+                    case opc.cmpne: stack.Pop2Push1((a, b) => a != b); break;
                     case opc.cmpg: stack.Pop2Push1((a, b) => a < b); break;
                     case opc.cmpge: stack.Pop2Push1((a, b) => a <= b); break;
                     case opc.cmpl: stack.Pop2Push1((a, b) => a > b); break;
@@ -156,10 +156,7 @@ namespace Whip.Scripting
                         {
                             var call = methods[arg32()];
                             var nargs = call.GetParameters().Count();
-                            var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
-                            var expected = call.GetParameters().Select(p => p.ParameterType);
-                            args = args.Zip(expected, (a, b) => (a is int && b == typeof(bool)) ? Convert.ToBoolean(a) : a).ToArray();
-                            stack.Pop1Push1(t => call.Invoke(t, args.ToArray()));
+                            CallExt(call, nargs);
                         }
                         break;
                     case opc.callint:
@@ -172,10 +169,7 @@ namespace Whip.Scripting
                         {
                             var call = methods[arg32()];
                             var nargs = arg8();
-                            var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
-                            var expected = call.GetParameters().Select(p => p.ParameterType);
-                            args = args.Zip(expected, (a, b) => (a is int && b == typeof(bool)) ? Convert.ToBoolean(a) : a).ToArray();
-                            stack.Pop1Push1(t => call.Invoke(t, args.ToArray()));
+                            CallExt(call, nargs);
                         }
                         break;
                     case opc.ret: return;
@@ -206,6 +200,27 @@ namespace Whip.Scripting
                 }
                 offset++;
             }
+        }
+
+        private void CallExt(MethodInfo call, int nargs)
+        {
+            var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
+            var expected = call.GetParameters().Select(p => p.ParameterType);
+            var needsContext = call.GetCustomAttribute(typeof(NeedsContextAttribute)) != null;
+            args =
+                EnumerableEx.If(
+                    () => call.GetCustomAttribute(typeof(NeedsContextAttribute)) != null,
+                    EnumerableEx.Return(ctx))
+                .Concat(
+                    args
+                    .Zip(expected, (a, b) => (a is int && b == typeof(bool)) ? Convert.ToBoolean(a) : a))
+                 .ToArray();
+            stack.Pop1Push1(t => call.Invoke(t, args.ToArray()));
+        }
+
+        void DoCallExt()
+        {
+
         }
 
         internal enum opc : byte
