@@ -10,7 +10,7 @@ using WhipTests.Scripting;
 
 namespace Whip.Scripting.Tests
 {
-    class DummyCtx : ScriptContext
+    class DummyCtx : IScriptContext
     {
         public static DummyCtx Instance = new DummyCtx();
 
@@ -26,12 +26,12 @@ namespace Whip.Scripting.Tests
         public void IsTrue(bool b) => Assert.IsTrue(b);
         public event Action Main;
 
-        public override object GetStaticObject(Guid g)
+        public object GetStaticObject(Guid g)
         {
             return Instance;
         }
 
-        public override Type ResolveType(Guid g)
+        public Type ResolveType(Guid g)
         {
             return typeMap[g];
         }

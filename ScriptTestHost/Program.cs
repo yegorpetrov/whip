@@ -7,7 +7,7 @@ using Whip.Scripting;
 
 namespace ScriptTestHost
 {
-    class DummyCtx : ScriptContext
+    class DummyCtx : IScriptContext
     {
         public static DummyCtx Instance = new DummyCtx();
 
@@ -22,12 +22,12 @@ namespace ScriptTestHost
 
         public event Action OnMain;
 
-        public override object GetStaticObject(Guid g)
+        public object GetStaticObject(Guid g)
         {
             return Instance;
         }
 
-        public override Type ResolveType(Guid g)
+        public Type ResolveType(Guid g)
         {
             return typeMap[g];
         }

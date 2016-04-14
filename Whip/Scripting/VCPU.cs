@@ -15,7 +15,7 @@ namespace Whip.Scripting
             BindingFlags.Public |
             BindingFlags.Instance;
 
-        readonly ScriptContext ctx;
+        readonly IScriptContext ctx;
         readonly Type[] types;
         readonly MethodInfo[] methods;
         readonly ScriptObjectStore objects;
@@ -23,7 +23,7 @@ namespace Whip.Scripting
 
         readonly ScriptStack<dynamic> stack = new ScriptStack<dynamic>();
         
-        public VCPU(byte[] exe, ScriptContext ctx)
+        public VCPU(byte[] exe, IScriptContext ctx)
         {
             this.ctx = ctx;
             using (var reader = new ScriptReader(exe))

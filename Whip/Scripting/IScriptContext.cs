@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Whip.Scripting
 {
-    public abstract class ScriptContext
+    public interface IScriptContext
     {
-        public abstract Type ResolveType(Guid g);
-        public abstract object GetStaticObject(Guid guid);
+        Type ResolveType(Guid g);
+        object GetStaticObject(Guid guid);
     }
 }
