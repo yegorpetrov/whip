@@ -72,10 +72,14 @@
     <Compile Include="Widgets\Frame.cs" />
     <Compile Include="Widgets\Group.cs" />
     <Compile Include="Widgets\GuiObject.cs" />
+    <Compile Include="Widgets\GuiObject.maki.cs" />
+    <Compile Include="Widgets\GuiObject.xml.cs" />
     <Compile Include="Widgets\ImageTest.cs" />
     <Compile Include="IXmlConfigurable.cs" />
     <Compile Include="RelatPanel.cs" />
     <Compile Include="SkinBootstrapper.cs" />
+    <Compile Include="Widgets\Layer.cs" />
+    <Compile Include="Widgets\WButton.cs" />
     <Compile Include="Widgets\WGrid.cs" />
     <Compile Include="WinampXmlReader.cs" />
     <Compile Include="XmlAdapter\ByteTo01Adapter.cs" />
