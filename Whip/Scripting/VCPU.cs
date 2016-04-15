@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -72,22 +73,37 @@ namespace Whip.Scripting
 
                 methods = calls
                     .Select(c =>
-                        types[c.TypeIdx]?.GetMethod(c.Name, CallFlags) ??
-                        types[c.TypeIdx]?.GetMethod(
-                            ScriptUtil.TranslateGetterSetter(c.Name), CallFlags))
+                    {
+                        var mi = types[c.TypeIdx]?.GetMethod(c.Name, CallFlags) ??
+                                types[c.TypeIdx]?.GetMethod(
+                                    ScriptUtil.TranslateGetterSetter(c.Name), CallFlags);
+                        if (mi == null && !c.Name.StartsWith("on"))
+                        {
+                            Debug.WriteLine("Null MI: T{0}, C='{1}'", c.TypeIdx, c.Name);
+                        }
+                        return mi;
+                    })
                     .ToArray();
 
                 objects.CreateListeners(listeners.Select(l =>
                 {
                     var typeIdx = calls[l.Call].TypeIdx;
                     var callName = calls[l.Call].Name;
-                    var evi = types[typeIdx].GetEvent(callName, CallFlags) ??
-                        types[typeIdx].GetEvent(
+                    var evi = types[typeIdx]?.GetEvent(callName, CallFlags) ??
+                        types[typeIdx]?.GetEvent(
                             ScriptUtil.TranslateEvent(callName), CallFlags);
-                    return new Tuple<int, EventInfo, Delegate>(
+                    if (evi != null)
+                    {
+                        return new Tuple<int, EventInfo, Delegate>(
                         l.Obj, evi, CreateEventHandler(evi, l.Offset, this)
                         );
-                }));
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Null EVI: T{0} C '{1}'", typeIdx, callName);
+                        return null;
+                    }
+                }).Where(l => l != null));
 
                 // We have init section
                 ExecuteAndStop(0, listeners.Min(l => l.Offset));

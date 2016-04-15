@@ -50,18 +50,9 @@ namespace Whip.Runtime
 
         public byte[] FindScript(string file)
         {
-            try
-            {
-                return File.ReadAllBytes(Path.Combine(Root, file));
-            }
-            catch (FileNotFoundException)
-            {
-                return Next?.FindScript(file);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                return Next?.FindScript(file);
-            }
+            var path = Path.Combine(Root, file);
+            return File.Exists(path) ?
+                File.ReadAllBytes(path) : Next?.FindScript(file);
         }
 
         public void Preload()

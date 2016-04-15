@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,6 +75,7 @@ namespace Whip.Widgets
             foreach (var xscript in groupdef.Elements("script"))
             {
                 var file = xscript.Attribute("file")?.Value ?? string.Empty;
+                Debug.WriteLine("Loading script " + file);
                 var script = ElementStore.System.LoadScript(ElementStore.FindScript(file), this);
             }
         }        

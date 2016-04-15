@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,6 +42,10 @@ namespace Whip.Runtime
         {
             Type result;
             knownTypes.TryGetValue(g, out result);
+            if (result == null)
+            {
+                Debug.WriteLine("Can't resolve " + g);
+            }
             return result;
         }
 

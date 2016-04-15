@@ -126,7 +126,6 @@ namespace Whip.Widgets
                     }
                     else
                     {
-                        Debug.WriteLine(xml.ToString());
                         return new ImageTest(xml);
                     }
             }
