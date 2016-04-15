@@ -11,6 +11,13 @@ namespace Whip.Runtime
 {
     partial class System0
     {
+#if DEBUG
+        public void Run()
+        {
+            ScriptLoaded?.Invoke();
+        }
+#endif
+
         public event Action ScriptLoaded;
         public event Action ScriptUnloading;
         public event Action Quit;
@@ -43,7 +50,7 @@ namespace Whip.Runtime
         [NeedsContext]
         public string GetParam(IScriptContext ctx)
         {
-            return string.Empty;
+            return (ctx as GroupContextProxy)?.Param;
         }
 
         public int MessageBox(string msg, string title, int flags, string suppress)
