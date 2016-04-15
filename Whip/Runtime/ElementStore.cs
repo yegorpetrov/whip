@@ -40,11 +40,11 @@ namespace Whip.Runtime
             set;
         }
 
-        public System System
+        public System0 System
         {
             get
             {
-                return System.Instance;
+                return System0.Instance;
             }
         }
 

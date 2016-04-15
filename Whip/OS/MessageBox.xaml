@@ -1,0 +1,32 @@
+﻿<Window x:Class="Whip.OS.MessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Whip.OS"
+        mc:Ignorable="d"
+        Title="MessageBox" Height="200" Width="auto">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Name="msg" Text="" Margin="30" TextWrapping="Wrap"/>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="1" Margin="0,0,0,20">
+            <StackPanel.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="MinWidth" Value="70"/>
+                    <Setter Property="Padding" Value="10,5,10,5"/>
+                    <Setter Property="Margin" Value="5,0,5,0"/>
+                </Style>
+            </StackPanel.Resources>
+            <Button Name="ok" Content="_OK" IsDefault="True" Click="ok_Click"/>
+            <Button Name="cancel" Content="_Cancel" IsCancel="True" Click="cancel_Click"/>
+            <Button Name="yes" Content="_Yes" Click="yes_Click"/>
+            <Button Name="no" Content="_No" Click="no_Click"/>
+            <Button Name="all" Content="_All" Click="all_Click"/>
+            <Button Name="next" Content="N_ext" Click="next_Click"/>
+            <Button Name="prev" Content="_Previous" Click="prev_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -9,13 +9,13 @@ using Whip.Widgets;
 
 namespace Whip.Runtime
 {
-    partial class System
+    partial class System0
     {
-        public readonly static System Instance = new System();
+        public readonly static System0 Instance = new System0();
 
         static readonly IDictionary<Guid, Type> knownTypes = new Dictionary<Guid, Type>()
         {
-            { new Guid("D6F50F64-93FA-49b7-93F1-BA66EFAE3E98"), typeof(System) },
+            { new Guid("D6F50F64-93FA-49b7-93F1-BA66EFAE3E98"), typeof(System0) },
             { new Guid("E90DC47B-840D-4ae7-B02C-040BD275F7FC"), typeof(Container) },
             { new Guid("4EE3E199-C636-4bec-97CD-78BC9C8628B0"), typeof(GuiObject) },
             { new Guid("45BE95E5-2072-4191-935C-BB5FF9F117FD"), typeof(Group) },
@@ -34,7 +34,7 @@ namespace Whip.Runtime
 
         public object GetStaticObject(Guid guid)
         {
-            if (ResolveType(guid) == typeof(System)) return this;
+            if (ResolveType(guid) == typeof(System0)) return this;
             else return null;
         }
 
