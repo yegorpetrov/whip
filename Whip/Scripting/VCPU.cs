@@ -171,8 +171,7 @@ namespace Whip.Scripting
                     case opc.callext:
                         {
                             var call = methods[arg32()];
-                            var nargs = call.GetParameters().Count();
-                            CallExt(call, nargs);
+                            CallExt(call, -1);
                         }
                         break;
                     case opc.callint:
@@ -220,9 +219,14 @@ namespace Whip.Scripting
 
         private void CallExt(MethodInfo call, int nargs)
         {
+            var needsContext = call.GetCustomAttribute(typeof(NeedsContextAttribute)) != null;
+            if (nargs < 0)
+            {
+                nargs = call.GetParameters().Count() - (needsContext ? 1 : 0);
+            }
+
             var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
             var expected = call.GetParameters().Select(p => p.ParameterType);
-            var needsContext = call.GetCustomAttribute(typeof(NeedsContextAttribute)) != null;
             args =
                 EnumerableEx.If(
                     () => call.GetCustomAttribute(typeof(NeedsContextAttribute)) != null,
