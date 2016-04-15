@@ -9,6 +9,12 @@ namespace Whip.Widgets
 {
     partial class GuiObject
     {
+        public string Id
+        {
+            get;
+            set;
+        }
+
         public void Show()
         {
             Visibility = Visibility.Visible;
