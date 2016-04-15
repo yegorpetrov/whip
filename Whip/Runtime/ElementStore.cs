@@ -56,7 +56,11 @@ namespace Whip.Runtime
             }
             catch (FileNotFoundException)
             {
-                return null;
+                return Next?.FindScript(file);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return Next?.FindScript(file);
             }
         }
 
