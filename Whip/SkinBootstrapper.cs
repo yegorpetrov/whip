@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Whip.Runtime;
 using Whip.Widgets;
 
 namespace Whip
 {
     class SkinBootstrapper
     {
-        const string root = @"c:\Yegor\testdata\winamp\Big Bento\";
+        const string root = @"e:\testdata\winamp\Skins\Winamp3\";
         const string root2 = @"c:\Program Files (x86)\Winamp\Plugins\freeform\xml\";
         static readonly ElementStore environment;
 
@@ -54,27 +55,36 @@ namespace Whip
         
         public SkinBootstrapper()
         {
-            var reader = new WinampXmlReader(Path.Combine(root, "skin.xml"));
-            var skin = XDocument.Load(reader);
-
-            var store = new ElementStore(skin.Elements().First(), root)
+            try
             {
-                Next = environment
-            };
-            store.Preload();
-            
-            var containers =
-                skin
-                .Elements()
-                .First()
-                .Elements("container");
+                var reader = new WinampXmlReader(Path.Combine(root, "skin.xml"));
+                var skin = XDocument.Load(reader);
 
-            var main =
-                containers
-                .Where(c => c.Attribute("id").Value == "main")
-                .First();
+                var store = new ElementStore(skin.Elements().First(), root)
+                {
+                    Next = environment
+                };
+                store.Preload();
 
-            Container.FromXml(main, store).Show();
+                var containers =
+                    skin
+                    .Elements()
+                    .First()
+                    .Elements("container");
+
+                var main =
+                    containers
+                    .Where(c => c.Attribute("id").Value == "main")
+                    .First();
+
+                Container.FromXml(main, store).Show();
+
+                store.System.Run();
+            }
+            catch (DirectoryNotFoundException)
+            {
+
+            }
         }
     }
 }

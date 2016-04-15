@@ -13,6 +13,8 @@ namespace Whip.Runtime
     {
         public readonly static System0 Instance = new System0();
 
+        readonly IDictionary<string, VCPU> scripts = new Dictionary<string, VCPU>();
+
         static readonly IDictionary<Guid, Type> knownTypes = new Dictionary<Guid, Type>()
         {
             { new Guid("D6F50F64-93FA-49b7-93F1-BA66EFAE3E98"), typeof(System0) },
@@ -21,7 +23,7 @@ namespace Whip.Runtime
             { new Guid("45BE95E5-2072-4191-935C-BB5FF9F117FD"), typeof(Group) },
             { new Guid("5AB9FA15-9A7D-4557-ABC8-6557A6C67CA9"), typeof(Layer) },
             { new Guid("698EDDCD-8F1E-4fec-9B12-F944F909FF45"), typeof(WButton) },
-            //{ new Guid(""), typeof() },
+            { new Guid("5D0C5BB6-7DE1-4b1f-A70F-8D1659941941"), typeof(MakiTimer) },
             //{ new Guid(""), typeof() },
             //{ new Guid(""), typeof() },
             //{ new Guid(""), typeof() },
@@ -49,18 +51,20 @@ namespace Whip.Runtime
             return result;
         }
 
-        public VCPU LoadScript(byte[] code, Group group)
+        public VCPU LoadScript(byte[] code, Group group, string param, string file)
         {
-            return new VCPU(code, new GroupContextProxy(group));
+            return file.Contains("titlebar") ? new VCPU(code, new GroupContextProxy(group, param)) : null;
         }
 
         class GroupContextProxy : IScriptContext
         {
             public readonly Group Group;
+            public readonly string Param;
 
-            public GroupContextProxy(Group group)
+            public GroupContextProxy(Group group, string param)
             {
                 Group = group;
+                Param = param;
             }
 
             public object GetStaticObject(Guid guid)

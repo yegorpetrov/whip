@@ -62,6 +62,7 @@
     <Compile Include="OS\MessageBox.xaml.cs">
       <DependentUpon>MessageBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Runtime\MakiTimer.cs" />
     <Compile Include="Runtime\System.cs" />
     <Compile Include="Runtime\System.maki.cs" />
     <Compile Include="Scripting\IScriptable.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Runtime\ElementStore.cs" />
     <Compile Include="Widgets\Frame.cs" />
     <Compile Include="Widgets\Group.cs" />
+    <Compile Include="Widgets\Group.maki.cs" />
     <Compile Include="Widgets\GuiObject.cs" />
     <Compile Include="Widgets\GuiObject.maki.cs" />
     <Compile Include="Widgets\GuiObject.xml.cs" />
