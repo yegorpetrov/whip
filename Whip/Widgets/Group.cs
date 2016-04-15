@@ -12,11 +12,10 @@ using Whip.Scripting;
 
 namespace Whip.Widgets
 {
-    class Group : GuiObject
+    partial class Group : GuiObject
     {
         readonly RelatPanel panel = new RelatPanel();
         readonly bool isGroupDef; // layouts are groupdefs too
-        string groupId;
         
         public Group(XElement xml) : base(xml)
         {
@@ -51,10 +50,10 @@ namespace Whip.Widgets
             switch (name)
             {
                 case "id":
-                    if (get) value = groupId;
+                    if (get) value = Id;
                     else
                     {
-                        groupId = value;
+                        Id = value;
                         if (!isGroupDef)
                         {
                             panel.Children.Clear();
@@ -75,8 +74,9 @@ namespace Whip.Widgets
             foreach (var xscript in groupdef.Elements("script"))
             {
                 var file = xscript.Attribute("file")?.Value ?? string.Empty;
+                var param = xscript.Attribute("param")?.Value ?? string.Empty;
                 Debug.WriteLine("Loading script " + file);
-                var script = ElementStore.System.LoadScript(ElementStore.FindScript(file), this);
+                var script = ElementStore.System.LoadScript(ElementStore.FindScript(file), this, param, file);
             }
         }        
     }
