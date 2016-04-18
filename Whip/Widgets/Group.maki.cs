@@ -13,7 +13,7 @@ namespace Whip.Widgets
             .Where(go => go.Id == id)
             .FirstOrDefault();
 
-        public GuiObject FindObject(string id) => GetObject(id) ??
+        public new GuiObject FindObject(string id) => GetObject(id) ??
             panel
             .Children
             .OfType<Group>()

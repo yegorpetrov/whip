@@ -126,14 +126,14 @@ namespace Whip.Scripting
         {
             Func<int> arg32 = () =>
             {
-                var result = BitConverter.ToInt32(code, offset + 1);
+                var result = BitConverter.ToInt32(code, offset);
                 offset += 4;
                 return result;
             };
 
             Func<byte> arg8 = () =>
             {
-                var result = code[offset + 1];
+                var result = code[offset];
                 offset++;
                 return result;
             };
@@ -141,7 +141,7 @@ namespace Whip.Scripting
             opc op;
             while (offset < stop)
             {
-                switch (op = (opc)code[offset])
+                switch (op = (opc)code[offset++])
                 {
                     case opc.nop: break;
                     case opc.load: stack.Load(objects, arg32()); break;
@@ -169,22 +169,16 @@ namespace Whip.Scripting
                         }
                         break;
                     case opc.climp:
+                    case opc.climpn:
                         {
                             var call = methods[arg32()];
-                            CallExt(call, -1);
+                            CallExt(call, op == opc.climp ? -1 : arg8());
                         }
                         break;
                     case opc.clint:
                         {
                             var f = arg32();
-                            ExecuteAndStop(f + offset + 1, int.MaxValue);
-                        }
-                        break;
-                    case opc.climpn:
-                        {
-                            var call = methods[arg32()];
-                            var nargs = arg8();
-                            CallExt(call, nargs);
+                            ExecuteAndStop(f + offset, int.MaxValue);
                         }
                         break;
                     case opc.ret: return;
@@ -213,7 +207,6 @@ namespace Whip.Scripting
                     case opc.del: stack.DeleteTop(objects); break;
                     default: throw new NotImplementedException();
                 }
-                offset++;
             }
         }
 
