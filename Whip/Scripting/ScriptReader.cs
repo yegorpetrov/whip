@@ -7,12 +7,28 @@ using System.Threading.Tasks;
 
 namespace Whip.Scripting
 {
-    class ScriptReader : BinaryReader
+    public class ScriptReader : BinaryReader
     {
+        enum State
+        {
+            Header, Types, Imports, Objects, Strings, Listeners, Code
+        }
+
+        State state;
+
         public ScriptReader(byte[] exe)
             : base(new MemoryStream(exe))
         {
+            state = State.Header;
+        }
 
+        void CheckState(State pos)
+        {
+            if (state != pos)
+            {
+                throw new InvalidOperationException(string.Format(
+                    "Position: expected {0}, got {1}", pos, state));
+            }
         }
 
         public override string ReadString()
@@ -27,17 +43,21 @@ namespace Whip.Scripting
 
         public bool ReadHeader()
         {
+            CheckState(State.Header);
             var fg = Encoding.ASCII.GetString(ReadBytes(2));
             var version = ReadBytes(6);
+            state++;
             return fg == "FG";
         }
 
         public IEnumerable<Guid> ReadTypeTable()
         {
+            CheckState(State.Types);
             for (int i = 0, _i = ReadInt32(); i < _i; i++)
             {
                 yield return ReadGuid();
             }
+            state++;
         }
 
         /// <summary>
@@ -46,6 +66,7 @@ namespace Whip.Scripting
         /// <returns>Type idx, call name</returns>
         public IEnumerable<Tuple<ushort, string>> ReadCallTable()
         {
+            CheckState(State.Imports);
             for (int i = 0, _i = ReadInt32(); i < _i; i++)
             {
                 var type = (ushort)(ReadInt16() & 0xFF); // TODO Why?
@@ -53,10 +74,12 @@ namespace Whip.Scripting
                 var name = ReadString();
                 yield return new Tuple<ushort, string>(type, name);
             }
+            state++;
         }
 
         public IEnumerable<object> ReadObjectTable(Guid[] guids)
         {
+            CheckState(State.Objects);
             bool nullRead = false;
             for (int i = 0, _i = ReadInt32(); i < _i; i++)
             {
@@ -100,6 +123,7 @@ namespace Whip.Scripting
                     yield return isSystem ? (object)guids[typeIdx] : null;
                 }
             }
+            state++;
         }
 
         /// <summary>
@@ -108,10 +132,12 @@ namespace Whip.Scripting
         /// <returns>Object idx, string</returns>
         public IEnumerable<Tuple<int, string>> ReadStringTable()
         {
+            CheckState(State.Strings);
             for (int i = 0, _i = ReadInt32(); i < _i; i++)
             {
                 yield return new Tuple<int, string>(ReadInt32(), ReadString());
             }
+            state++;
         }
 
         /// <summary>
@@ -120,16 +146,22 @@ namespace Whip.Scripting
         /// <returns>Object idx, call idx, code offset</returns>
         public IEnumerable<Tuple<int, int, int>> ReadListenerTable()
         {
+            CheckState(State.Listeners);
             for (int i = 0, _i = ReadInt32(); i < _i; i++)
             {
                 yield return new Tuple<int, int, int>(
                     ReadInt32(), ReadInt32(), ReadInt32());
             }
+            state++;
         }
 
         public byte[] ReadBytecode()
         {
-            return ReadBytes(ReadInt32());
+            CheckState(State.Code);
+            var code = ReadBytes(ReadInt32());
+            BaseStream.Seek(0, SeekOrigin.Begin);
+            state = State.Header;
+            return code;
         }
     }
 }

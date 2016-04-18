@@ -20,7 +20,7 @@ namespace Whip.Scripting
             Push(f(Pop()));
         }
 
-        public void PushN(ScriptObjectStore collection, int idx)
+        public void Load(ScriptObjectStore collection, int idx)
         {
             Push(collection[positions[Count + 1] = idx] as T);
         }
