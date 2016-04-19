@@ -119,6 +119,8 @@ namespace Whip.Widgets
                     return new WButton(xml);
                 case "layer":
                     return new Layer(xml);
+                case "text":
+                    return new WText(xml);
                 default:
                     if ((xui = store.GetGroupDef(type)) != null)
                     {

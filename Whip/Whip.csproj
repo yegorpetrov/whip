@@ -62,6 +62,7 @@
     <Compile Include="OS\MessageBox.xaml.cs">
       <DependentUpon>MessageBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Runtime\BitmapFont.cs" />
     <Compile Include="Runtime\MakiTimer.cs" />
     <Compile Include="Runtime\System.cs" />
     <Compile Include="Runtime\System.maki.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Widgets\Layer.cs" />
     <Compile Include="Widgets\WButton.cs" />
     <Compile Include="Widgets\WGrid.cs" />
+    <Compile Include="Widgets\WText.cs" />
     <Compile Include="WinampXmlReader.cs" />
     <Compile Include="XmlAdapter\ByteTo01Adapter.cs" />
     <Compile Include="XmlAdapter\IntegerAdapter.cs" />
