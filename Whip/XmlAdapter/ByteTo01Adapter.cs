@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,12 +12,12 @@ namespace Whip.XmlAdapter
     {
         public string GetDp(DependencyProperty dp, DependencyObject target)
         {
-            return ((int)Math.Round((double)target.GetValue(dp) * 255)).ToString();
+            return ((int)Math.Round((double)target.GetValue(dp) * 255)).ToString(CultureInfo.InvariantCulture);
         }
 
         public void SetDp(DependencyProperty dp, DependencyObject target, string xmlPropValue)
         {
-            target.SetValue(dp, byte.Parse(xmlPropValue) / 255.0);
+            target.SetValue(dp, byte.Parse(xmlPropValue, CultureInfo.InvariantCulture) / 255.0);
         }
     }
 }

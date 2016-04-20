@@ -104,5 +104,32 @@ namespace Whip.Scripting
 
             return handler.CreateDelegate(handlerType, target);
         }
+
+        static string TranslateGetterSetter(string getSetName)
+        {
+            var cmp = StringComparison.InvariantCultureIgnoreCase;
+            if (getSetName.StartsWith("get", cmp) ||
+                getSetName.StartsWith("set", cmp))
+            {
+                return getSetName.Insert(3, "_");
+            }
+            else
+            {
+                return getSetName;
+            }
+        }
+
+        static string TranslateEvent(string name)
+        {
+            var cmp = StringComparison.InvariantCultureIgnoreCase;
+            if (name.StartsWith("on", cmp))
+            {
+                return name.Substring(2);
+            }
+            else
+            {
+                return name;
+            }
+        }
     }
 }

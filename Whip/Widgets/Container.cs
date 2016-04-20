@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,8 +70,8 @@ namespace Whip.Widgets
                             case 'w': dp = WidthProperty; break;
                             case 'h': dp = HeightProperty; break;
                         }
-                        if (get) value = Math.Round((double)GetValue(dp)).ToString();
-                        else SetValue(dp, double.Parse(value));
+                        if (get) value = Math.Round((double)GetValue(dp)).ToString(CultureInfo.InvariantCulture);
+                        else SetValue(dp, double.Parse(value, CultureInfo.InvariantCulture));
                     }
                     break;
             }

@@ -11,7 +11,7 @@ namespace Whip.Scripting
     class ScriptObjectStore : IEnumerable<object>
     {
         object[] objects;
-        Tuple<int, EventInfo, Delegate>[] handlers;
+        Tuple<int, EventInfo, Delegate>[] eventHandlers;
 
         public ScriptObjectStore(IEnumerable<object> objects, IEnumerable<Tuple<int, string>> strings)
         {
@@ -21,7 +21,7 @@ namespace Whip.Scripting
 
         public void CreateListeners(IEnumerable<Tuple<int, EventInfo, Delegate>> handlers)
         {
-            this.handlers = handlers.ToArray();
+            eventHandlers = handlers.ToArray();
             for (int i = 0; i < objects.Length; i++) this[i] = objects[i];
         }
 
@@ -43,9 +43,9 @@ namespace Whip.Scripting
             }
             set
             {
-                if (handlers != null)
+                if (eventHandlers != null)
                 { 
-                    foreach (var h in handlers.Where(h => h.Item1 == i && h.Item2 != null))
+                    foreach (var h in eventHandlers.Where(h => h.Item1 == i && h.Item2 != null))
                     {
                         if (objects[i] != null) h.Item2.RemoveEventHandler(objects[i], h.Item3);
                         if (value != null) h.Item2.AddEventHandler(value, h.Item3);
@@ -57,8 +57,8 @@ namespace Whip.Scripting
 
         public void Unsubscribe()
         {
-            if (handlers == null) return;
-            foreach (var h in handlers)
+            if (eventHandlers == null) return;
+            foreach (var h in eventHandlers)
             {
                 h.Item2.RemoveEventHandler(objects[h.Item1], h.Item3);
             }

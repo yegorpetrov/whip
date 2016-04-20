@@ -15,6 +15,7 @@ namespace Whip.Scripting
         }
 
         State state;
+        readonly IDisposable memStream;
 
         public ScriptReader(byte[] exe)
             : base(new MemoryStream(exe))
@@ -22,6 +23,7 @@ namespace Whip.Scripting
             state = State.Header;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
         void CheckState(State pos)
         {
             if (state != pos)

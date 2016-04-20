@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -26,6 +27,10 @@ namespace Whip.Scripting
         
         public VCPU(byte[] exe, IScriptContext ctx)
         {
+            if (ctx == null)
+            {
+                throw new ArgumentNullException(nameof(ctx));
+            }
             this.ctx = ctx;
             using (var reader = new ScriptReader(exe))
             {
@@ -76,8 +81,8 @@ namespace Whip.Scripting
                     {
                         var mi = types[c.TypeIdx]?.GetMethod(c.Name, CallFlags) ??
                                 types[c.TypeIdx]?.GetMethod(
-                                    ScriptUtil.TranslateGetterSetter(c.Name), CallFlags);
-                        if (mi == null && !c.Name.StartsWith("on"))
+                                    TranslateGetterSetter(c.Name), CallFlags);
+                        if (mi == null && !c.Name.StartsWith("on", StringComparison.InvariantCultureIgnoreCase))
                         {
                             Debug.WriteLine("Null MI: T{0}, C='{1}'", c.TypeIdx, c.Name);
                         }
@@ -91,7 +96,7 @@ namespace Whip.Scripting
                     var callName = calls[l.Call].Name;
                     var evi = types[typeIdx]?.GetEvent(callName, CallFlags) ??
                         types[typeIdx]?.GetEvent(
-                            ScriptUtil.TranslateEvent(callName), CallFlags);
+                            TranslateEvent(callName), CallFlags);
                     if (evi != null)
                     {
                         return new Tuple<int, EventInfo, Delegate>(

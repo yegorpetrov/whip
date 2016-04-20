@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -136,12 +137,13 @@ namespace Whip.Runtime
             }
             else
             {
+                var invariant = CultureInfo.InvariantCulture;
                 var rect = new Int32Rect()
                 {
-                    X = int.Parse(entry.Attribute("x").Value),
-                    Y = int.Parse(entry.Attribute("y").Value),
-                    Width = int.Parse(entry.Attribute("w").Value),
-                    Height = int.Parse(entry.Attribute("h").Value)
+                    X = int.Parse(entry.Attribute("x").Value, invariant),
+                    Y = int.Parse(entry.Attribute("y").Value, invariant),
+                    Width = int.Parse(entry.Attribute("w").Value, invariant),
+                    Height = int.Parse(entry.Attribute("h").Value, invariant)
                 };
                 rect.Width = rect.Width + Math.Min(0, file.PixelWidth - rect.Width - rect.X);
                 rect.Height = rect.Height + Math.Min(0, file.PixelHeight - rect.Height - rect.Y);

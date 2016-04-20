@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -106,7 +107,7 @@ namespace Whip.Widgets
         {
             var type = xml.Name.LocalName;
             var xui = default(XElement);
-            switch (type.ToLower())
+            switch (type.ToLower(CultureInfo.InvariantCulture))
             {
                 case "group":
                 case "layout":

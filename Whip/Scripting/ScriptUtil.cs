@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -9,33 +10,6 @@ namespace Whip.Scripting
 {
     public static class ScriptUtil
     {
-        public static string TranslateGetterSetter(string getSetName)
-        {
-            var cmp = StringComparison.InvariantCultureIgnoreCase;
-            if (getSetName.StartsWith("get", cmp) ||
-                getSetName.StartsWith("set", cmp))
-            {
-                return getSetName.Insert(3, "_");
-            }
-            else
-            {
-                return getSetName;
-            }
-        }
-
-        public static string TranslateEvent(string name)
-        {
-            var cmp = StringComparison.InvariantCultureIgnoreCase;
-            if (name.StartsWith("on", cmp))
-            {
-                return name.Substring(2);
-            }
-            else
-            {
-                return name;
-            }
-        }
-
         public static void Disassemble(IDictionary<int, string> functions, IEnumerable<string> imports, string name, byte[] code, int offset = 0, int stop = int.MaxValue)
         {
             Func<int> arg32 = () =>
@@ -113,7 +87,7 @@ namespace Whip.Scripting
                     case VCPU.opc.climpn:
                         {
                             var import = arg32();
-                            args = imports.ElementAtOrDefault(import) ?? import.ToString();
+                            args = imports.ElementAtOrDefault(import) ?? import.ToString(CultureInfo.InvariantCulture);
                             if (opc == VCPU.opc.climpn)
                             {
                                 args = arg8() + " " + args;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace Whip.Widgets
 
         protected override void ProcessXmlProperty(string name, ref string value)
         {
-            switch (name.ToLower())
+            switch (name.ToLower(CultureInfo.InvariantCulture))
             {
                 case "image":
                     img.Source = neutral = ElementStore.GetBitmap(value);

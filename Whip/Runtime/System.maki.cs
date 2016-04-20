@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,8 +71,8 @@ namespace Whip.Runtime
             }
         }
 
-        public int StringToInteger(string s) => int.Parse(s);
+        public int StringToInteger(string s) => int.Parse(s, CultureInfo.CurrentCulture);
 
-        public string IntegerToString(int i) => i.ToString();
+        public string IntegerToString(int i) => i.ToString(CultureInfo.CurrentCulture);
     }
 }
