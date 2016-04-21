@@ -1,0 +1,31 @@
+#ifndef __STD_MI
+#define __STD_MI
+
+#define MC_TARGET "TEST"
+
+// GUIDS
+extern class @{51654971-0D87-4a51-91E3-A6B53235F3E7}@ @{00000000-0000-0000-0000-000000000000}@ Object;
+extern class @{F641B031-80A9-4C90-8104-B635981F29E4}@ Object _predecl System;
+
+#ifndef true
+#define true 1
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef false
+#define false 0
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+extern System.OnMain();
+extern System.IsTrue(boolean b);
+
+.CODE
+
+.STACKPROT
+
+#endif
+
