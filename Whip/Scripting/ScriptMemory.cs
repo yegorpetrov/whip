@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Whip.Scripting
 {
-    class ScriptObjectStore : IEnumerable<object>
+    class ScriptMemory : IEnumerable<object>
     {
         object[] objects;
         Tuple<int, EventInfo, Delegate>[] eventHandlers;
 
-        public ScriptObjectStore(IEnumerable<object> objects, IEnumerable<Tuple<int, string>> strings)
+        public ScriptMemory(IEnumerable<object> objects, IEnumerable<Tuple<int, string>> strings)
         {
             this.objects = objects.ToArray();
             strings.ForEach(s => this.objects[s.Item1] = s.Item2);

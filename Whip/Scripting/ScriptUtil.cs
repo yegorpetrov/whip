@@ -31,7 +31,7 @@ namespace Whip.Scripting
 
             if (functions.ContainsKey(offset)) return;
             var jumps = new Dictionary<int, string>();
-            VCPU.opc opc;
+            OPC opc;
             while (offset < code.Length && offset < stop)
             {
                 var args = string.Empty;
@@ -47,19 +47,19 @@ namespace Whip.Scripting
                 }
 
                 var @break = false;
-                switch (opc = (VCPU.opc)code[offset++])
+                switch (opc = (OPC)code[offset++])
                 {
-                    case VCPU.opc.load:
-                    case VCPU.opc.save:
-                    case VCPU.opc.del:
+                    case OPC.load:
+                    case OPC.save:
+                    case OPC.del:
                         args = "v" + arg32();
                         break;
-                    case VCPU.opc.make:
+                    case OPC.make:
                         args = "t" + arg32();
                         break;
-                    case VCPU.opc.jiz:
-                    case VCPU.opc.jmp:
-                    case VCPU.opc.jnz:
+                    case OPC.jiz:
+                    case OPC.jmp:
+                    case OPC.jnz:
                         {
                             var jmp = arg32() + offset;
                             if (jmp < offset)
@@ -73,22 +73,22 @@ namespace Whip.Scripting
                             args = "L" + jmp;
                         }
                         break;
-                    case VCPU.opc.ret:
+                    case OPC.ret:
                         @break = jumps.IsEmpty();
                         break;
-                    case VCPU.opc.clint:
+                    case OPC.clint:
                         {
                             var call = arg32() + offset;
                             args = "F" + call;
                             Disassemble(functions, imports, args, code, call);
                         }
                         break;
-                    case VCPU.opc.climp:
-                    case VCPU.opc.climpn:
+                    case OPC.climp:
+                    case OPC.climpn:
                         {
                             var import = arg32();
                             args = imports.ElementAtOrDefault(import) ?? import.ToString(CultureInfo.InvariantCulture);
-                            if (opc == VCPU.opc.climpn)
+                            if (opc == OPC.climpn)
                             {
                                 args = arg8() + " " + args;
                             }

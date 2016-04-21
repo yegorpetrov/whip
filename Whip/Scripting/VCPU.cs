@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 namespace Whip.Scripting
 {
+    public delegate object ArgPuller();
+
     public partial class VCPU
     {
         const BindingFlags CallFlags =
@@ -19,11 +21,11 @@ namespace Whip.Scripting
 
         readonly IScriptContext ctx;
         readonly Type[] types;
-        readonly MethodInfo[] methods;
-        readonly ScriptObjectStore objects;
+        readonly ScriptImport[] methods;
+        readonly ScriptMemory objects;
         readonly byte[] code;
 
-        readonly ScriptStack<dynamic> stack = new ScriptStack<dynamic>();
+        readonly ScriptStack stack;
         
         public VCPU(byte[] exe, IScriptContext ctx)
         {
@@ -50,9 +52,11 @@ namespace Whip.Scripting
                         })
                     .ToArray();
 
-                objects = new ScriptObjectStore(
+                objects = new ScriptMemory(
                     reader.ReadObjectTable(guids).ToArray(),
                     reader.ReadStringTable().ToArray());
+
+                stack = new ScriptStack(objects);
 
                 for (int i = 0, _i = objects.Count(); i < _i; i++)
                 {
@@ -77,17 +81,7 @@ namespace Whip.Scripting
                     .ToArray();
 
                 methods = calls
-                    .Select(c =>
-                    {
-                        var mi = types[c.TypeIdx]?.GetMethod(c.Name, CallFlags) ??
-                                types[c.TypeIdx]?.GetMethod(
-                                    TranslateGetterSetter(c.Name), CallFlags);
-                        if (mi == null && !c.Name.StartsWith("on", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            Debug.WriteLine("Null MI: T{0}, C='{1}'", c.TypeIdx, c.Name);
-                        }
-                        return mi;
-                    })
+                    .Select(c => new ScriptImport(ctx, guids[c.TypeIdx], c.Name))
                     .ToArray();
 
                 objects.CreateListeners(listeners.Select(l =>
@@ -120,169 +114,86 @@ namespace Whip.Scripting
             objects.Unsubscribe();
         }
 
-        public void Run()
+        object CallImportN(int n, ArgPuller arg, int nargs)
         {
-            Execute(0);
+            return methods[n].Call(arg, nargs);
+        }
+
+        object CreateInstance(int n)
+        {
+            return Activator.CreateInstance(types[n]);
         }
 
         void Execute(int offset) => ExecuteAndStop(offset, int.MaxValue);
 
         void ExecuteAndStop(int offset, int stop)
         {
-            Func<int> arg32 = () =>
+            var address = new ScriptAddress(CallImportN, CreateInstance, code, offset);
+            byte opcode;
+            while(true)
             {
-                var result = BitConverter.ToInt32(code, offset);
-                offset += 4;
-                return result;
-            };
-
-            Func<byte> arg8 = () =>
-            {
-                var result = code[offset];
-                offset++;
-                return result;
-            };
-
-            opc op;
-            while (offset < stop)
-            {
-                switch (op = (opc)code[offset++])
+                if (address.PC >= stop)
                 {
-                    case opc.nop: break;
-                    case opc.load: stack.Load(objects, arg32()); break;
-                    case opc.drop: stack.Pop(); break;
-                    case opc.save: objects[arg32()] = stack.Pop(); break;
-                    case opc.cmpeq: stack.Pop2Push1((a, b) => a == b); break;
-                    case opc.cmpne: stack.Pop2Push1((a, b) => a != b); break;
-                    case opc.cmpgt: stack.Pop2Push1((a, b) => a < b); break;
-                    case opc.cmpge: stack.Pop2Push1((a, b) => a <= b); break;
-                    case opc.cmplt: stack.Pop2Push1((a, b) => a > b); break;
-                    case opc.cmple: stack.Pop2Push1((a, b) => a >= b); break;
-                    case opc.jiz:
-                    case opc.jnz:
-                        {
-                            var sw = Convert.ToBoolean(stack.Pop());
-                            var jmp = arg32();
-                            if (op == opc.jnz) offset += sw ? jmp : 0;
-                            else offset += sw ? 0 : jmp;
-                        }
-                        break;
-                    case opc.jmp:
-                        {
-                            var jmp = arg32();
-                            offset += jmp;
-                        }
-                        break;
-                    case opc.climp:
-                    case opc.climpn:
-                        {
-                            var call = methods[arg32()];
-                            CallExt(call, op == opc.climp ? -1 : arg8());
-                        }
-                        break;
-                    case opc.clint:
-                        {
-                            var f = arg32();
-                            ExecuteAndStop(f + offset, int.MaxValue);
-                        }
-                        break;
-                    case opc.ret: return;
-                    case opc.stop: break; //TODO
-                    case opc.set: stack.Pop2Push1((p1, p2) => p1); stack.SaveTop(objects); break;
-                    case opc.incp: stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(objects); break;
-                    case opc.decp: stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(objects); break;
-                    case opc.pinc: stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(objects); break;
-                    case opc.pdec: stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(objects); break;
-                    case opc.add: stack.Pop2Push1((a, b) => b + a); break;
-                    case opc.sub: stack.Pop2Push1((a, b) => b - a); break;
-                    case opc.mul: stack.Pop2Push1((a, b) => b * a); break;
-                    case opc.div: stack.Pop2Push1((a, b) => b / a); break;
-                    case opc.mod: stack.Pop2Push1((a, b) => b % a); break;
-                    case opc.band: stack.Pop2Push1((a, b) => a & b); break;
-                    case opc.bor: stack.Pop2Push1((a, b) => a | b); break;
-                    case opc.not: stack.Pop1Push1(a => !Convert.ToBoolean(a)); break;
-                    case opc.bnot: stack.Pop1Push1(a => ~a); break;
-                    case opc.neg: stack.Pop1Push1(a => -a); break;
-                    case opc.bxor: stack.Pop2Push1((a, b) => a ^ b); break;
-                    case opc.and: stack.Pop2Push1((a, b) => a && b); break;
-                    case opc.or: stack.Pop2Push1((a, b) => a || b); break;
-                    case opc.shl: stack.Pop2Push1((a, b) => b << a); break;
-                    case opc.shr: stack.Pop2Push1((a, b) => b >> a); break;
-                    case opc.make: stack.Push(Activator.CreateInstance(types[arg32()])); break;
-                    case opc.del: stack.DeleteTop(objects); break;
-                    default: throw new NotImplementedException();
+                    break;
                 }
+                opcode = address.Arg8();
+                if (opcode == (byte)OPC.ret)
+                {
+                    if (address.Return())
+                    {
+                        break;
+                    }
+                }
+                else ops[opcode](address, stack);
             }
         }
 
-        private void CallExt(MethodInfo call, int nargs)
+        static readonly Action<ScriptAddress, ScriptStack>[] ops =
+        new Action<ScriptAddress, ScriptStack>[byte.MaxValue];
+
+        static VCPU()
         {
-            var needsContext = call.GetCustomAttribute(typeof(NeedsContextAttribute)) != null;
-            if (nargs < 0)
-            {
-                nargs = call.GetParameters().Count() - (needsContext ? 1 : 0);
-            }
+            Func<OPC, byte> _ = o => (byte)o;
 
-            var args = EnumerableEx.Generate(0, i => i < nargs, i => i + 1, i => stack.Pop());
-            var expected = call.GetParameters().Select(p => p.ParameterType);
-            args =
-                EnumerableEx.If(
-                    () => call.GetCustomAttribute(typeof(NeedsContextAttribute)) != null,
-                    EnumerableEx.Return(ctx))
-                .Concat(
-                    args
-                    .Zip(expected, (a, b) => (a is int && b == typeof(bool)) ? Convert.ToBoolean(a) : a))
-                 .ToArray();
-            stack.Pop1Push1(t => call.Invoke(t, args.ToArray()));
-        }
-
-        void DoCallExt()
-        {
-
-        }
-
-        internal enum opc : byte
-        {
-            nop = 0x0,
-            load = 0x1, // int32 obj_idx
-            drop = 0x2,
-            save = 0x3, // int32 obj_idx
-            cmpeq = 0x8,
-            cmpne = 0x9,
-            cmpgt = 0xa,
-            cmpge = 0xb,
-            cmplt = 0xc,
-            cmple = 0xd,
-            jiz = 0x10, // int32 offset
-            jnz = 0x11, // int32 offset
-            jmp = 0x12, // int32 offset
-            climp = 0x18, // int32 import
-            clint = 0x19, // int32 offset
-            ret = 0x21,
-            stop = 0x28,
-            set = 0x30,
-            incp = 0x38, // A++
-            decp = 0x39, // A−−
-            pinc = 0x3a, // ++A
-            pdec = 0x3b, // −−A
-            add = 0x40,
-            sub = 0x41,
-            mul = 0x42,
-            div = 0x43,
-            mod = 0x44,
-            band = 0x48, // A & B
-            bor = 0x49, // A | B
-            not = 0x4a, // !A
-            bnot = 0x4b, // ~A
-            neg = 0x4c, // −1*A
-            bxor = 0x4d, // A ^ B
-            and = 0x50, // A && B
-            or = 0x51, // A || B
-            shl = 0x58,
-            shr = 0x59,
-            make = 0x60, // int32 type
-            del = 0x61, // delete
-            climpn = 0x70, // int32 import, int8 n_args
+            ops[_(OPC.nop)]  = (pc, stack) => { };
+            ops[_(OPC.load)] = (pc, stack) => stack.Load(pc.Arg32());
+            ops[_(OPC.drop)] = (pc, stack) => stack.Pop();
+            ops[_(OPC.save)] = (pc, stack) => stack.Save(pc.Arg32());
+            ops[_(OPC.cmpeq)] = (pc, stack) => stack.Pop2Push1((a, b) => a == b);
+            ops[_(OPC.cmpne)] = (pc, stack) => stack.Pop2Push1((a, b) => a != b);
+            ops[_(OPC.cmpgt)] = (pc, stack) => stack.Pop2Push1((a, b) => a < b);
+            ops[_(OPC.cmpge)] = (pc, stack) => stack.Pop2Push1((a, b) => a <= b);
+            ops[_(OPC.cmplt)] = (pc, stack) => stack.Pop2Push1((a, b) => a > b);
+            ops[_(OPC.cmple)] = (pc, stack) => stack.Pop2Push1((a, b) => a >= b);
+            ops[_(OPC.jiz)] = (pc, stack) => pc.Jump(!Convert.ToBoolean(stack.Pop()));
+            ops[_(OPC.jnz)] = (pc, stack) => pc.Jump(Convert.ToBoolean(stack.Pop()));
+            ops[_(OPC.jmp)] = (pc, stack) => pc.Jump(true);
+            ops[_(OPC.climp)] = (pc, stack) => stack.Push(pc.callImportN(pc.Arg32(), stack.Pop, -1));
+            ops[_(OPC.climpn)] = (pc, stack) => stack.Push(pc.callImportN(pc.Arg32(), stack.Pop, pc.Arg8()));
+            ops[_(OPC.clint)] = (pc, stack) => pc.CallFunction();
+            ops[_(OPC.stop)] = (pc, stack) => { };
+            ops[_(OPC.set)] = (pc, stack) => { stack.Pop2Push1((p1, p2) => p1); stack.SaveTop(); };
+            ops[_(OPC.incp)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(); };
+            ops[_(OPC.decp)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(); };
+            ops[_(OPC.pinc)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(); };
+            ops[_(OPC.pdec)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(); };
+            ops[_(OPC.add)] = (pc, stack) => { stack.Pop2Push1((a, b) => b + a); };
+            ops[_(OPC.sub)] = (pc, stack) => { stack.Pop2Push1((a, b) => b - a); };
+            ops[_(OPC.mul)] = (pc, stack) => { stack.Pop2Push1((a, b) => b * a); };
+            ops[_(OPC.div)] = (pc, stack) => { stack.Pop2Push1((a, b) => b / a); };
+            ops[_(OPC.mod)] = (pc, stack) => { stack.Pop2Push1((a, b) => b % a); };
+            ops[_(OPC.band)] = (pc, stack) => { stack.Pop2Push1((a, b) => a & b); };
+            ops[_(OPC.bor)] = (pc, stack) => { stack.Pop2Push1((a, b) => a | b); };
+            ops[_(OPC.not)] = (pc, stack) => { stack.Pop1Push1(a => !Convert.ToBoolean(a)); };
+            ops[_(OPC.bnot)] = (pc, stack) => { stack.Pop1Push1(a => ~a); };
+            ops[_(OPC.neg)] = (pc, stack) => { stack.Pop1Push1(a => -a); };
+            ops[_(OPC.bxor)] = (pc, stack) => { stack.Pop2Push1((a, b) => a ^ b); };
+            ops[_(OPC.and)] = (pc, stack) => { stack.Pop2Push1((a, b) => a && b); };
+            ops[_(OPC.or)] = (pc, stack) => { stack.Pop2Push1((a, b) => a || b); };
+            ops[_(OPC.shl)] = (pc, stack) => { stack.Pop2Push1((a, b) => b << a); };
+            ops[_(OPC.shr)] = (pc, stack) => { stack.Pop2Push1((a, b) => b >> a); };
+            ops[_(OPC.make)] = (pc, stack) => stack.Push(pc.createInstance(pc.Arg32()));
+            ops[_(OPC.del)] = (pc, stack) => stack.DeleteTop();
         }
     }
 }

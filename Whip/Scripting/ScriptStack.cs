@@ -6,31 +6,43 @@ using System.Threading.Tasks;
 
 namespace Whip.Scripting
 {
-    class ScriptStack<T> : Stack<T> where T : class
+    class ScriptStack : Stack<dynamic>
     {
+        ScriptMemory objects;
+
+        public ScriptStack(ScriptMemory objectStore)
+        {
+            objects = objectStore;
+        }
+
         readonly IDictionary<int, int> positions = new Dictionary<int, int>();
 
-        public void Pop2Push1(Func<T, T, T> f)
+        public void Pop2Push1(Func<dynamic, dynamic, dynamic> f)
         {
             Push(f(Pop(), Pop()));
         }
 
-        public void Pop1Push1(Func<T, T> f)
+        public void Pop1Push1(Func<dynamic, dynamic> f)
         {
             Push(f(Pop()));
         }
 
-        public void Load(ScriptObjectStore collection, int idx)
+        public void Load(int idx)
         {
-            Push(collection[positions[Count + 1] = idx] as T);
+            Push(objects[positions[Count + 1] = idx]);
         }
 
-        public void SaveTop(ScriptObjectStore collection)
+        public void SaveTop()
         {
-            collection[positions[Count]] = Peek();
+            objects[positions[Count]] = Peek();
         }
 
-        public void DeleteTop(ScriptObjectStore collection)
+        public void Save(int i)
+        {
+            objects[i] = Pop();
+        }
+
+        public void DeleteTop()
         {
             (Pop() as IDisposable)?.Dispose();
             Push(null);

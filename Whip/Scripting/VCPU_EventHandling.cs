@@ -14,8 +14,8 @@ namespace Whip.Scripting
         static readonly MethodInfo
             _exec = typeof(VCPU).GetMethod(nameof(Execute),
                 BindingFlags.NonPublic | BindingFlags.Instance),
-            _push = typeof(ScriptStack<dynamic>).GetMethod("Push"),
-            _pop = typeof(ScriptStack<dynamic>).GetMethod("Pop"),
+            _push = typeof(ScriptStack).GetMethod("Push"),
+            _pop = typeof(ScriptStack).GetMethod("Pop"),
             _enter = typeof(Monitor).GetMethod("Enter",
                 BindingFlags.Public | BindingFlags.Static,
                 Type.DefaultBinder, new[] { typeof(object) }, null),

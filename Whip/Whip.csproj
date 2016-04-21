@@ -79,12 +79,16 @@
       <DependentUpon>MessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Runtime\BitmapFont.cs" />
+    <Compile Include="Runtime\GroupContextProxy.cs" />
     <Compile Include="Runtime\MakiTimer.cs" />
     <Compile Include="Runtime\System.cs" />
     <Compile Include="Runtime\System.maki.cs" />
     <Compile Include="Scripting\IScriptable.cs" />
     <Compile Include="Scripting\IScriptContext.cs" />
-    <Compile Include="Scripting\ScriptObjectStore.cs" />
+    <Compile Include="Scripting\OPC.cs" />
+    <Compile Include="Scripting\ScriptAddress.cs" />
+    <Compile Include="Scripting\ScriptImport.cs" />
+    <Compile Include="Scripting\ScriptMemory.cs" />
     <Compile Include="Scripting\ScriptReader.cs" />
     <Compile Include="Scripting\ScriptStack.cs" />
     <Compile Include="Scripting\ScriptUtil.cs" />

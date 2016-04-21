@@ -48,10 +48,11 @@ namespace ScriptTestHost
         static void Main(string[] args)
         {
             var file = @"E:\testdata\winamp\scripts\timer.maki";
-            /*var vcpu = new VCPU(File.ReadAllBytes(file), DummyCtx.Instance);
+            var vcpu = new VCPU(File.ReadAllBytes(file), DummyCtx.Instance);
             DummyCtx.Instance.DoOnStart();
-            Console.Read();*/
-            var reader = new ScriptReader(File.ReadAllBytes(file));
+            Console.Read();
+
+            /*var reader = new ScriptReader(File.ReadAllBytes(file));
             reader.ReadHeader();
             var types = reader.ReadTypeTable().ToArray();
             var imports = reader.ReadCallTable().ToArray();
@@ -70,7 +71,7 @@ namespace ScriptTestHost
                     code, l.Item3);
             }
             var da = functions.Select(p => p.Value).Aggregate(string.Concat);
-            Console.WriteLine(da);
+            Console.WriteLine(da);*/
         }
     }
 }

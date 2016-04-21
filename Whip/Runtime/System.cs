@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Whip.Scripting;
@@ -56,26 +57,6 @@ namespace Whip.Runtime
             return file.Contains("titlebar") ? new VCPU(code, new GroupContextProxy(group, param)) : null;
         }
 
-        class GroupContextProxy : IScriptContext
-        {
-            public readonly Group Group;
-            public readonly string Param;
-
-            public GroupContextProxy(Group group, string param)
-            {
-                Group = group;
-                Param = param;
-            }
-
-            public object GetStaticObject(Guid guid)
-            {
-                return Instance.GetStaticObject(guid);
-            }
-
-            public Type ResolveType(Guid g)
-            {
-                return Instance.ResolveType(g);
-            }
-        }
+        
     }
 }
