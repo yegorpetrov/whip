@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Xml.Linq;
-using Whip.Scripting;
+using WhipMaki;
 
 namespace Whip.Widgets
 {

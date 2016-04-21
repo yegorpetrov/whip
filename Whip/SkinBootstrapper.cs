@@ -12,7 +12,7 @@ namespace Whip
 {
     class SkinBootstrapper
     {
-        const string root = @"e:\testdata\winamp\Skins\Winamp3\";
+        const string root = @"e:\testdata\winamp\Skins\Big Bento\";
         const string root2 = @"c:\Program Files (x86)\Winamp\Plugins\freeform\xml\";
         static readonly ElementStore environment;
 

@@ -83,17 +83,6 @@
     <Compile Include="Runtime\MakiTimer.cs" />
     <Compile Include="Runtime\System.cs" />
     <Compile Include="Runtime\System.maki.cs" />
-    <Compile Include="Scripting\IScriptable.cs" />
-    <Compile Include="Scripting\IScriptContext.cs" />
-    <Compile Include="Scripting\OPC.cs" />
-    <Compile Include="Scripting\ScriptAddress.cs" />
-    <Compile Include="Scripting\ScriptImport.cs" />
-    <Compile Include="Scripting\ScriptMemory.cs" />
-    <Compile Include="Scripting\ScriptReader.cs" />
-    <Compile Include="Scripting\ScriptStack.cs" />
-    <Compile Include="Scripting\ScriptUtil.cs" />
-    <Compile Include="Scripting\VCPU.cs" />
-    <Compile Include="Scripting\VCPU_EventHandling.cs" />
     <Compile Include="Widgets\Container.cs" />
     <Compile Include="Runtime\ElementStore.cs" />
     <Compile Include="Widgets\Frame.cs" />
@@ -171,6 +160,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WhipMaki\WhipMaki.csproj">
+      <Project>{95295b0c-1119-4570-9375-ebfdc93055d6}</Project>
+      <Name>WhipMaki</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

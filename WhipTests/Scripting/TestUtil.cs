@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using WhipMaki;
 
 namespace Whip.Scripting.Tests
 {

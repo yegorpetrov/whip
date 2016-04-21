@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Whip.Scripting
+namespace WhipMaki
 {
     internal enum OPC : byte
     {

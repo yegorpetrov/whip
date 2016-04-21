@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Whip.Scripting
+namespace WhipMaki
 {
     class ScriptImport
     {

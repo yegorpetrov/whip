@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Whip.Scripting
+namespace WhipMaki
 {
     class ScriptAddress
     {
@@ -81,7 +81,7 @@ namespace Whip.Scripting
 
         public override string ToString()
         {
-            return pc.ToString();
+            return string.Format("{0}{1}", pc, " " + string.Join(",", callStack.Reverse()));
         }
     }
 }

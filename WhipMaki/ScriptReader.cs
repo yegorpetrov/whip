@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Whip.Scripting
+namespace WhipMaki
 {
     public class ScriptReader : BinaryReader
     {
