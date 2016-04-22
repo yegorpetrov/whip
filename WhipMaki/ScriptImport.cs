@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WhipMaki
 {
@@ -13,27 +11,35 @@ namespace WhipMaki
         readonly MethodInfo method;
         readonly bool needsContext;
         readonly IScriptContext context;
-        readonly Type[] parameterTypes;
-        readonly IList<object> args = new List<object>();
-
-        public ScriptImport(IScriptContext ctx, Guid type, string name)
+        readonly IReadOnlyList<Type> parameterTypes;
+        
+        public ScriptImport(IScriptContext ctx, Maki.Import import)
         {
             if (ctx == null)
             {
                 throw new ArgumentNullException(nameof(ctx));
             }
             context = ctx;
-            method = ResolveImport(ctx.ResolveType(type), name);
-            parameterTypes = method?.GetParameters().Select(p => p.ParameterType).ToArray();
-            needsContext = method?.GetCustomAttribute<NeedsContextAttribute>() != null;
-            nargs = method?.GetParameters().Count() ?? 0;
+            var guid = import.Maki.Guids[import.TypeIdx];
+            method = ResolveImport(ctx.ResolveType(guid), import.Name);
+            if (method != null)
+            {
+                parameterTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
+                needsContext = method.IsDefined(typeof(NeedsContextAttribute));
+                nargs = method.GetParameters().Count();
+            }
         }
 
         public object Call(ArgPuller argf, int nargs)
         {
-            if (nargs < 0) nargs = parameterTypes.Length;
+            var args = new List<object>();
+            if (nargs < 0) nargs = parameterTypes.Count;
             args.Clear();
-            if (needsContext) args.Add(context);
+            if (needsContext)
+            {
+                args.Add(context);
+                nargs--;
+            }
             for (int i = 0; i < nargs; i++)
             {
                 var arg = argf();
@@ -43,16 +49,16 @@ namespace WhipMaki
             return method.Invoke(argf(), args.ToArray());
         }
 
-        const BindingFlags CallFlags =
-            BindingFlags.IgnoreCase |
-            BindingFlags.Public |
-            BindingFlags.Instance;
-
         static MethodInfo ResolveImport(Type t, string name)
         {
+            var flags =
+                BindingFlags.IgnoreCase |
+                BindingFlags.Public |
+                BindingFlags.Instance;
+
             return
-                t?.GetMethod(name, CallFlags) ??
-                t?.GetMethod(TranslateGetterSetter(name), CallFlags);
+                t?.GetMethod(name, flags) ??
+                t?.GetMethod(TranslateGetterSetter(name), flags);
         }
 
         static string TranslateGetterSetter(string getSetName)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WhipMaki
 {
-    class ScriptAddress
+    class ScriptSequencer
     {
         readonly Stack<int> callStack = new Stack<int>();
         public readonly Func<int, object> createInstance;
@@ -19,7 +19,7 @@ namespace WhipMaki
             get { return pc; }
         }
 
-        public ScriptAddress(
+        public ScriptSequencer(
             Func<int, ArgPuller, int, object> nCaller,
             Func<int, object> newInstance,
             byte[] exe, int start)

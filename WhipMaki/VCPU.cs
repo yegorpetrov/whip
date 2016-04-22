@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -19,12 +20,14 @@ namespace WhipMaki
             BindingFlags.Public |
             BindingFlags.Instance;
 
+        readonly Maki maki;
         readonly IScriptContext ctx;
-        readonly Type[] types;
-        readonly ScriptImport[] methods;
-        readonly ScriptMemory objects;
+        readonly IReadOnlyList<Type> types;
+        readonly IReadOnlyList<ScriptImport> imports;
+        readonly IReadOnlyCollection<ScriptEvent> events;
+        readonly ScriptMemory memory;
         readonly byte[] code;
-
+        
         readonly ScriptStack stack;
         
         public VCPU(byte[] exe, IScriptContext ctx)
@@ -34,109 +37,51 @@ namespace WhipMaki
                 throw new ArgumentNullException(nameof(ctx));
             }
             this.ctx = ctx;
-            using (var reader = new ScriptReader(exe))
-            {
-                reader.ReadHeader();
 
-                var guids = reader
-                    .ReadTypeTable()
-                    .ToArray();
+            maki = new Maki(exe);
+            types = maki.Guids.Select(
+                g => ctx.ResolveType(g)).ToList();
+            imports = maki.Imports.Select(
+                i => new ScriptImport(ctx, i)).ToList();
+            events = maki.Listeners.Select(
+                l => new ScriptEvent(ctx, l, CreateEventHandler)).ToList();
+            memory = new ScriptMemory(
+                maki.Objects.Select(InstantiateIfGuid), events);
+            stack = new ScriptStack(memory);
+            code = maki.Code.ToArray();
 
-                var calls = reader
-                    .ReadCallTable()
-                    .Select(
-                        c => new
-                        {
-                            TypeIdx = c.Item1,
-                            Name = c.Item2
-                        })
-                    .ToArray();
+            // We have init section
+            ExecuteAndStop(0, maki.Listeners.Min(l => l.Offset));
+        }
 
-                objects = new ScriptMemory(
-                    reader.ReadObjectTable(guids).ToArray(),
-                    reader.ReadStringTable().ToArray());
-
-                stack = new ScriptStack(objects);
-
-                for (int i = 0, _i = objects.Count(); i < _i; i++)
-                {
-                    if (objects[i] is Guid) objects[i] = ctx.GetStaticObject((Guid)objects[i]);
-                }
-
-                var listeners = reader
-                    .ReadListenerTable()
-                    .Select(
-                        l => new
-                        {
-                            Obj = l.Item1,
-                            Call = l.Item2,
-                            Offset = l.Item3
-                        })
-                    .ToArray();
-
-                code = reader.ReadBytecode();
-
-                types = guids
-                    .Select(ctx.ResolveType)
-                    .ToArray();
-
-                methods = calls
-                    .Select(c => new ScriptImport(ctx, guids[c.TypeIdx], c.Name))
-                    .ToArray();
-
-                objects.CreateListeners(listeners.Select(l =>
-                {
-                    var typeIdx = calls[l.Call].TypeIdx;
-                    var callName = calls[l.Call].Name;
-                    var evi = types[typeIdx]?.GetEvent(callName, CallFlags) ??
-                        types[typeIdx]?.GetEvent(
-                            TranslateEvent(callName), CallFlags);
-                    if (evi != null)
-                    {
-                        return new Tuple<int, EventInfo, Delegate>(
-                        l.Obj, evi, CreateEventHandler(evi, l.Offset, this)
-                        );
-                    }
-                    else
-                    {
-                        Debug.WriteLine("Null EVI: T{0} C '{1}'", typeIdx, callName);
-                        return null;
-                    }
-                }).Where(l => l != null));
-
-                // We have init section
-                ExecuteAndStop(0, listeners.Min(l => l.Offset));
-            }
+        object InstantiateIfGuid(object o)
+        {
+            return o is Guid ? ctx.GetStaticObject((Guid)o) : o;
         }
 
         public void Unsubscribe()
         {
-            objects.Unsubscribe();
+            memory.Unsubscribe();
         }
 
         object CallImportN(int n, ArgPuller arg, int nargs)
         {
-            return methods[n].Call(arg, nargs);
+            return imports[n].Call(arg, nargs);
         }
 
         object CreateInstance(int n)
         {
-            return Activator.CreateInstance(types[n]);
+            return Activator.CreateInstance(ctx.ResolveType(maki.Guids[n]));
         }
 
         void Execute(int offset) => ExecuteAndStop(offset, int.MaxValue);
 
         void ExecuteAndStop(int offset, int stop)
         {
-            var address = new ScriptAddress(CallImportN, CreateInstance, code, offset);
-            byte opcode;
-            while(true)
+            var address = new ScriptSequencer(CallImportN, CreateInstance, code, offset);
+            while(address.PC < stop)
             {
-                if (address.PC >= stop)
-                {
-                    break;
-                }
-                opcode = address.Arg8();
+                var opcode = address.Arg8();
                 if (opcode == (byte)OPC.ret)
                 {
                     if (address.Return())
@@ -148,8 +93,8 @@ namespace WhipMaki
             }
         }
 
-        static readonly Action<ScriptAddress, ScriptStack>[] ops =
-        new Action<ScriptAddress, ScriptStack>[byte.MaxValue];
+        static readonly Action<ScriptSequencer, ScriptStack>[] ops =
+        new Action<ScriptSequencer, ScriptStack>[byte.MaxValue];
 
         static VCPU()
         {

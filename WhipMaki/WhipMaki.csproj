@@ -46,11 +46,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Maki.cs" />
+    <Compile Include="MakiReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IScriptable.cs" />
     <Compile Include="IScriptContext.cs" />
     <Compile Include="OPC.cs" />
-    <Compile Include="ScriptAddress.cs" />
+    <Compile Include="ScriptEvent.cs" />
+    <Compile Include="ScriptSequencer.cs" />
     <Compile Include="ScriptImport.cs" />
     <Compile Include="ScriptMemory.cs" />
     <Compile Include="ScriptReader.cs" />

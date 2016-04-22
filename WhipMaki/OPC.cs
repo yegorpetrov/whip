@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WhipMaki
 {
-    internal enum OPC : byte
+    enum OPC : byte
     {
         nop = 0x0,
         load = 0x1, // int32 obj_idx

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace WhipMaki
 {
@@ -26,7 +23,7 @@ namespace WhipMaki
         static readonly FieldInfo _stack = typeof(VCPU).GetField(
             nameof(stack), BindingFlags.NonPublic | BindingFlags.Instance);
 
-        static Delegate CreateEventHandler(EventInfo evi, int offset, object target)
+        Delegate CreateEventHandler(EventInfo evi, int offset)
         {
             var handlerType = evi.EventHandlerType;
 
@@ -102,21 +99,7 @@ namespace WhipMaki
             // Return
             gen.Emit(OpCodes.Ret);
 
-            return handler.CreateDelegate(handlerType, target);
-        }
-
-        static string TranslateGetterSetter(string getSetName)
-        {
-            var cmp = StringComparison.InvariantCultureIgnoreCase;
-            if (getSetName.StartsWith("get", cmp) ||
-                getSetName.StartsWith("set", cmp))
-            {
-                return getSetName.Insert(3, "_");
-            }
-            else
-            {
-                return getSetName;
-            }
+            return handler.CreateDelegate(handlerType, this);
         }
 
         static string TranslateEvent(string name)
