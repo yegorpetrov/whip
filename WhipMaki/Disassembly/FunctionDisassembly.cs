@@ -2,16 +2,32 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WhipMaki
+namespace WhipMaki.Disassembly
 {
-    public static class ScriptUtil
+    public class FunctionDisassembly : Disassembly
     {
-        public static void Disassemble(IDictionary<int, string> functions, IEnumerable<string> imports, string name, byte[] code, int offset = 0, int stop = int.MaxValue)
+        public readonly int startOffset;
+        public readonly int stopOffset = int.MaxValue;
+        public readonly byte[] code;
+        readonly IEnumerable<Maki.Import> imports;
+
+        public FunctionDisassembly(byte[] code0, int start, int stop,
+            IEnumerable<Maki.Import> imports0)
         {
+            startOffset = start;
+            stopOffset = stop;
+            code = code0;
+            imports = imports0;
+        }
+
+        public override void Disassemble(IDictionary<int, Disassembly> funcs)
+        {
+            funcs[startOffset] = this;
+            var offset = startOffset;
+
             Func<int> arg32 = () =>
             {
                 var result = BitConverter.ToInt32(code, offset);
@@ -26,13 +42,10 @@ namespace WhipMaki
                 return result;
             };
 
-            name = name ?? "F" + offset;
-            var listing = new StringBuilder(name + Environment.NewLine);
-
-            if (functions.ContainsKey(offset)) return;
+            listing.Clear();
+            listing.AppendLine("@" + startOffset);
             var jumps = new Dictionary<int, string>();
-            OPC opc;
-            while (offset < code.Length && offset < stop)
+            while (offset < stopOffset && offset < code.Length)
             {
                 var args = string.Empty;
                 if (jumps.ContainsKey(offset))
@@ -45,8 +58,8 @@ namespace WhipMaki
                 {
                     listing.Append("  " + offset + ":\t");
                 }
-
                 var @break = false;
+                OPC opc;
                 switch (opc = (OPC)code[offset++])
                 {
                     case OPC.load:
@@ -80,14 +93,21 @@ namespace WhipMaki
                         {
                             var call = arg32() + offset;
                             args = "F" + call;
-                            Disassemble(functions, imports, args, code, call);
+                            if (!funcs.ContainsKey(call))
+                            {
+                                (funcs[call] = new FunctionDisassembly(code,
+                                    call, int.MaxValue, imports)).Disassemble(funcs);
+                            }
                         }
                         break;
                     case OPC.climp:
                     case OPC.climpn:
                         {
                             var import = arg32();
-                            args = imports.ElementAtOrDefault(import) ?? import.ToString(CultureInfo.InvariantCulture);
+                            args =
+                                imports.ElementAtOrDefault(import).Name ??
+                                import.ToString(CultureInfo.InvariantCulture);
+
                             if (opc == OPC.climpn)
                             {
                                 args = arg8() + " " + args;
@@ -98,7 +118,7 @@ namespace WhipMaki
                 listing.AppendLine(string.Join(" ", opc.ToString(), args));
                 if (@break)
                 {
-                    listing.AppendLine(";" + name);
+                    listing.AppendLine(";");
                     break;
                 }
             }
@@ -106,7 +126,6 @@ namespace WhipMaki
             {
                 throw new InvalidProgramException();
             }
-            functions[offset] = listing.ToString();
         }
     }
 }

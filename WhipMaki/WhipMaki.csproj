@@ -46,6 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Disassembly\Disassembly.cs" />
+    <Compile Include="Disassembly\FunctionDisassembly.cs" />
+    <Compile Include="Disassembly\ListenerDisassembly.cs" />
+    <Compile Include="Disassembly\ScriptDisassembly.cs" />
     <Compile Include="Maki.cs" />
     <Compile Include="MakiReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -55,9 +59,7 @@
     <Compile Include="ScriptSequencer.cs" />
     <Compile Include="ScriptImport.cs" />
     <Compile Include="ScriptMemory.cs" />
-    <Compile Include="ScriptReader.cs" />
     <Compile Include="ScriptStack.cs" />
-    <Compile Include="ScriptUtil.cs" />
     <Compile Include="VCPU.cs" />
     <Compile Include="VCPU_EventHandling.cs" />
   </ItemGroup>
