@@ -75,9 +75,9 @@ namespace WhipMaki
             return Activator.CreateInstance(ctx.ResolveType(maki.Guids[n]));
         }
 
-        void Execute(int offset) => ExecuteAndStop(offset, int.MaxValue);
+        object Execute(int offset) => ExecuteAndStop(offset, int.MaxValue);
 
-        void ExecuteAndStop(int offset, int stop)
+        object ExecuteAndStop(int offset, int stop)
         {
             var address = new ScriptSequencer(CallImportN, CreateInstance, code, offset);
             while(address.PC < stop)
@@ -87,11 +87,12 @@ namespace WhipMaki
                 {
                     if (address.Return())
                     {
-                        break;
+                        return stack.Pop();
                     }
                 }
                 else ops[opcode](address, stack);
             }
+            return null;
         }
 
         delegate void Cycle(ScriptSequencer seq, ScriptStack st);

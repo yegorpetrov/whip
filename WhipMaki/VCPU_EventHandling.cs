@@ -81,11 +81,6 @@ namespace WhipMaki
             gen.Emit(OpCodes.Ldc_I4, offset);
             gen.Emit(OpCodes.Call, _exec);
 
-            // Pop the value to return
-            gen.Emit(OpCodes.Ldarg_0);
-            gen.Emit(OpCodes.Ldfld, _stack);
-            gen.Emit(OpCodes.Callvirt, _pop);
-
             // MAKI pushes null onto stack even if the handler
             // must return void
             if (retType == typeof(void)) gen.Emit(OpCodes.Pop);

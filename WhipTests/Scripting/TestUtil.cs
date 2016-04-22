@@ -10,7 +10,7 @@ namespace Whip.Scripting.Tests
             var ctx = DummyCtx.Instance;
             var vcpu = new VCPU(File.ReadAllBytes(file), ctx);
             ctx.DoOnStart();
-            vcpu.Unsubscribe();
+            vcpu.Shutdown();
         }
     }
 }
