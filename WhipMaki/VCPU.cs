@@ -24,9 +24,8 @@ namespace WhipMaki
         readonly IScriptContext ctx;
         readonly IReadOnlyList<Type> types;
         readonly IReadOnlyList<ScriptImport> imports;
-        readonly IReadOnlyCollection<ScriptEvent> events;
-        readonly ScriptMemory memory;
         readonly byte[] code;
+        readonly Action shutdown;
         
         readonly ScriptStack stack;
         
@@ -43,15 +42,17 @@ namespace WhipMaki
                 g => ctx.ResolveType(g)).ToList();
             imports = maki.Imports.Select(
                 i => new ScriptImport(ctx, i)).ToList();
-            events = maki.Listeners.Select(
+            var events = maki.Listeners.Select(
                 l => new ScriptEvent(ctx, l, CreateEventHandler)).ToList();
-            memory = new ScriptMemory(
+            var memory = new ScriptMemory(
                 maki.Objects.Select(InstantiateIfGuid), events);
             stack = new ScriptStack(memory);
             code = maki.Code.ToArray();
 
             // We have init section
             ExecuteAndStop(0, maki.Listeners.Min(l => l.Offset));
+
+            shutdown = memory.Unsubscribe;
         }
 
         object InstantiateIfGuid(object o)
@@ -59,9 +60,9 @@ namespace WhipMaki
             return o is Guid ? ctx.GetStaticObject((Guid)o) : o;
         }
 
-        public void Unsubscribe()
+        public void Shutdown()
         {
-            memory.Unsubscribe();
+            shutdown();
         }
 
         object CallImportN(int n, ArgPuller arg, int nargs)
@@ -93,52 +94,55 @@ namespace WhipMaki
             }
         }
 
-        static readonly Action<ScriptSequencer, ScriptStack>[] ops =
-        new Action<ScriptSequencer, ScriptStack>[byte.MaxValue];
+        delegate void Cycle(ScriptSequencer seq, ScriptStack st);
+
+        static readonly Cycle[] ops = new Cycle[byte.MaxValue];
 
         static VCPU()
         {
-            Func<OPC, byte> _ = o => (byte)o;
-
-            ops[_(OPC.nop)]  = (pc, stack) => { };
-            ops[_(OPC.load)] = (pc, stack) => stack.Load(pc.Arg32());
-            ops[_(OPC.drop)] = (pc, stack) => stack.Pop();
-            ops[_(OPC.save)] = (pc, stack) => stack.Save(pc.Arg32());
-            ops[_(OPC.cmpeq)] = (pc, stack) => stack.Pop2Push1((a, b) => a == b);
-            ops[_(OPC.cmpne)] = (pc, stack) => stack.Pop2Push1((a, b) => a != b);
-            ops[_(OPC.cmpgt)] = (pc, stack) => stack.Pop2Push1((a, b) => a < b);
-            ops[_(OPC.cmpge)] = (pc, stack) => stack.Pop2Push1((a, b) => a <= b);
-            ops[_(OPC.cmplt)] = (pc, stack) => stack.Pop2Push1((a, b) => a > b);
-            ops[_(OPC.cmple)] = (pc, stack) => stack.Pop2Push1((a, b) => a >= b);
-            ops[_(OPC.jiz)] = (pc, stack) => pc.Jump(!Convert.ToBoolean(stack.Pop()));
-            ops[_(OPC.jnz)] = (pc, stack) => pc.Jump(Convert.ToBoolean(stack.Pop()));
-            ops[_(OPC.jmp)] = (pc, stack) => pc.Jump(true);
-            ops[_(OPC.climp)] = (pc, stack) => stack.Push(pc.callImportN(pc.Arg32(), stack.Pop, -1));
-            ops[_(OPC.climpn)] = (pc, stack) => stack.Push(pc.callImportN(pc.Arg32(), stack.Pop, pc.Arg8()));
-            ops[_(OPC.clint)] = (pc, stack) => pc.CallFunction();
-            ops[_(OPC.stop)] = (pc, stack) => { };
-            ops[_(OPC.set)] = (pc, stack) => { stack.Pop2Push1((p1, p2) => p1); stack.SaveTop(); };
-            ops[_(OPC.incp)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(); };
-            ops[_(OPC.decp)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(); };
-            ops[_(OPC.pinc)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 + 1); stack.SaveTop(); };
-            ops[_(OPC.pdec)] = (pc, stack) => { stack.Pop1Push1(n1 => n1 - 1); stack.SaveTop(); };
-            ops[_(OPC.add)] = (pc, stack) => { stack.Pop2Push1((a, b) => b + a); };
-            ops[_(OPC.sub)] = (pc, stack) => { stack.Pop2Push1((a, b) => b - a); };
-            ops[_(OPC.mul)] = (pc, stack) => { stack.Pop2Push1((a, b) => b * a); };
-            ops[_(OPC.div)] = (pc, stack) => { stack.Pop2Push1((a, b) => b / a); };
-            ops[_(OPC.mod)] = (pc, stack) => { stack.Pop2Push1((a, b) => b % a); };
-            ops[_(OPC.band)] = (pc, stack) => { stack.Pop2Push1((a, b) => a & b); };
-            ops[_(OPC.bor)] = (pc, stack) => { stack.Pop2Push1((a, b) => a | b); };
-            ops[_(OPC.not)] = (pc, stack) => { stack.Pop1Push1(a => !Convert.ToBoolean(a)); };
-            ops[_(OPC.bnot)] = (pc, stack) => { stack.Pop1Push1(a => ~a); };
-            ops[_(OPC.neg)] = (pc, stack) => { stack.Pop1Push1(a => -a); };
-            ops[_(OPC.bxor)] = (pc, stack) => { stack.Pop2Push1((a, b) => a ^ b); };
-            ops[_(OPC.and)] = (pc, stack) => { stack.Pop2Push1((a, b) => a && b); };
-            ops[_(OPC.or)] = (pc, stack) => { stack.Pop2Push1((a, b) => a || b); };
-            ops[_(OPC.shl)] = (pc, stack) => { stack.Pop2Push1((a, b) => b << a); };
-            ops[_(OPC.shr)] = (pc, stack) => { stack.Pop2Push1((a, b) => b >> a); };
-            ops[_(OPC.make)] = (pc, stack) => stack.Push(pc.createInstance(pc.Arg32()));
-            ops[_(OPC.del)] = (pc, stack) => stack.DeleteTop();
+            new Dictionary<OPC, Cycle>()
+            {
+                { OPC.nop, (seq, st) => { } },
+                { OPC.load, (seq, st) => st.Load(seq.Arg32()) },
+                { OPC.drop, (seq, st) => st.Pop() },
+                { OPC.save, (seq, st) => st.Save(seq.Arg32()) },
+                { OPC.cmpeq, (seq, st) => st.Pop2Push1((a, b) => a == b) },
+                { OPC.cmpne, (seq, st) => st.Pop2Push1((a, b) => a != b) },
+                { OPC.cmpgt, (seq, st) => st.Pop2Push1((a, b) => a < b) },
+                { OPC.cmpge, (seq, st) => st.Pop2Push1((a, b) => a <= b) },
+                { OPC.cmplt, (seq, st) => st.Pop2Push1((a, b) => a > b) },
+                { OPC.cmple, (seq, st) => st.Pop2Push1((a, b) => a >= b) },
+                { OPC.jiz, (seq, st) => seq.Jump(!Convert.ToBoolean(st.Pop())) },
+                { OPC.jnz, (seq, st) => seq.Jump(Convert.ToBoolean(st.Pop())) },
+                { OPC.jmp, (seq, st) => seq.Jump(true) },
+                { OPC.climp, (seq, st) => st.Push(seq.callImportN(seq.Arg32(), st.Pop, -1)) },
+                { OPC.climpn, (seq, st) => st.Push(seq.callImportN(seq.Arg32(), st.Pop, seq.Arg8())) },
+                { OPC.clint, (seq, st) => seq.CallFunction() },
+                { OPC.stop, (seq, st) => { } },
+                { OPC.set, (seq, st) => { st.Pop2Push1((p1, p2) => p1); st.SaveTop(); } },
+                { OPC.incp, (seq, st) => { st.Pop1Push1(n1 => n1 + 1); st.SaveTop(); } },
+                { OPC.decp, (seq, st) => { st.Pop1Push1(n1 => n1 - 1); st.SaveTop(); } },
+                { OPC.pinc, (seq, st) => { st.Pop1Push1(n1 => n1 + 1); st.SaveTop(); } },
+                { OPC.pdec, (seq, st) => { st.Pop1Push1(n1 => n1 - 1); st.SaveTop(); } },
+                { OPC.add, (seq, st) => { st.Pop2Push1((a, b) => b + a); } },
+                { OPC.sub, (seq, st) => { st.Pop2Push1((a, b) => b - a); } },
+                { OPC.mul, (seq, st) => { st.Pop2Push1((a, b) => b * a); } },
+                { OPC.div, (seq, st) => { st.Pop2Push1((a, b) => b / a); } },
+                { OPC.mod, (seq, st) => { st.Pop2Push1((a, b) => b % a); } },
+                { OPC.band, (seq, st) => { st.Pop2Push1((a, b) => a & b); } },
+                { OPC.bor, (seq, st) => { st.Pop2Push1((a, b) => a | b); } },
+                { OPC.not, (seq, st) => { st.Pop1Push1(a => !Convert.ToBoolean(a)); } },
+                { OPC.bnot, (seq, st) => { st.Pop1Push1(a => ~a); } },
+                { OPC.neg, (seq, st) => { st.Pop1Push1(a => -a); } },
+                { OPC.bxor, (seq, st) => { st.Pop2Push1((a, b) => a ^ b); } },
+                { OPC.and, (seq, st) => { st.Pop2Push1((a, b) => a && b); } },
+                { OPC.or, (seq, st) => { st.Pop2Push1((a, b) => a || b); } },
+                { OPC.shl, (seq, st) => { st.Pop2Push1((a, b) => b << a); } },
+                { OPC.shr, (seq, st) => { st.Pop2Push1((a, b) => b >> a); } },
+                { OPC.make, (seq, st) => st.Push(seq.createInstance(seq.Arg32())) },
+                { OPC.del, (seq, st) => st.DeleteTop() }
+            }
+            .ForEach(kv => ops[(byte)kv.Key] = kv.Value);
         }
     }
 }
