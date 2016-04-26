@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhipTests", "WhipTests\Whip
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhipMaki", "WhipMaki\WhipMaki.csproj", "{95295B0C-1119-4570-9375-EBFDC93055D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mda", "mda\mda.csproj", "{1141C349-0AF2-40C5-A68D-307E0863D246}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{95295B0C-1119-4570-9375-EBFDC93055D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95295B0C-1119-4570-9375-EBFDC93055D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95295B0C-1119-4570-9375-EBFDC93055D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1141C349-0AF2-40C5-A68D-307E0863D246}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1141C349-0AF2-40C5-A68D-307E0863D246}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1141C349-0AF2-40C5-A68D-307E0863D246}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1141C349-0AF2-40C5-A68D-307E0863D246}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
