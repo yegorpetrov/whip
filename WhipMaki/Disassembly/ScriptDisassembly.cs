@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WhipMaki.Disassembly
 {
@@ -24,8 +21,14 @@ namespace WhipMaki.Disassembly
                 .Select(l => new ListenerDisassembly(l))
                 .ForEach(l => l.Disassemble(funcs));
 
-            var txt = string.Join("\r\n", funcs
-                .Select(kv => kv.Value.ToString()));
+            var min = maki.Listeners.Min(l => l.Offset);
+            if (min > 0)
+            {
+                funcs[0] = new FunctionDisassembly(maki.Code.ToArray(), 0, min, maki.Imports);
+                funcs[0].Disassemble(funcs);
+            }
+
+            var txt = string.Join("\r\n", funcs.Select(v => v.Value.ToString()));
 
             listing.Append(txt);
         }

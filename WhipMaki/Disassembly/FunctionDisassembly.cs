@@ -64,7 +64,6 @@ namespace WhipMaki.Disassembly
                 {
                     case OPC.load:
                     case OPC.save:
-                    case OPC.del:
                         args = "v" + arg32();
                         break;
                     case OPC.make:
@@ -124,7 +123,7 @@ namespace WhipMaki.Disassembly
             }
             if (jumps.Any())
             {
-                throw new InvalidProgramException();
+                throw new Exception("Jumps left");
             }
         }
     }
