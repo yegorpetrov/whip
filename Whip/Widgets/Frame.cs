@@ -19,17 +19,18 @@ namespace Whip.Widgets
             Content = grid;
         }
 
-        protected override void ProcessXmlProperty(string name, ref string value)
+        protected override void ProcessXmlProperty(string name, string value)
         {
             switch (name)
             {
                 case "left":
+                    Grid.SetColumn(FromXml(ElementStore.GetGroupDef(value), ElementStore), 0);
+                    break;
                 case "right":
-                    var content = FromXml(ElementStore.GetGroupDef(value), ElementStore);
-                    Grid.SetColumn(content, name == "left" ? 0 : 1);
+                    Grid.SetColumn(FromXml(ElementStore.GetGroupDef(value), ElementStore), 1);
                     break;
             }
-            base.ProcessXmlProperty(name, ref value);
+            base.ProcessXmlProperty(name, value);
         }
     }
 }

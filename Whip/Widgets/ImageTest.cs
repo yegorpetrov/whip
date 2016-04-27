@@ -17,7 +17,7 @@ namespace Whip.Widgets
 
         }
 
-        protected override void ProcessXmlProperty(string name, ref string value)
+        protected override void ProcessXmlProperty(string name, string value)
         {
             if (name == "image")
             {
@@ -27,7 +27,7 @@ namespace Whip.Widgets
                     Stretch = Stretch.Fill
                 };
             }
-            base.ProcessXmlProperty(name, ref value);
+            base.ProcessXmlProperty(name, value);
         }
     }
 }

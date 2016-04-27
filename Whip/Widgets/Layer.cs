@@ -17,9 +17,9 @@ namespace Whip.Widgets
             Content = img = new Image() { Stretch = System.Windows.Media.Stretch.Fill };
         }
 
-        protected override void ProcessXmlProperty(string name, ref string value)
+        protected override void ProcessXmlProperty(string name, string value)
         {
-            base.ProcessXmlProperty(name, ref value);
+            base.ProcessXmlProperty(name, value);
             switch (name)
             {
                 case "image":

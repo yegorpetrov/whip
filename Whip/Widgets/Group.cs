@@ -44,27 +44,21 @@ namespace Whip.Widgets
             Content = panel;
         }
 
-        protected override void ProcessXmlProperty(string name, ref string value)
+        protected override void ProcessXmlProperty(string name, string value)
         {
-            base.ProcessXmlProperty(name, ref value);
-            bool get = value == null;
+            base.ProcessXmlProperty(name, value);
             switch (name)
             {
                 case "id":
-                    if (get) value = Id;
-                    else
+                    Id = value;
+                    if (!isGroupDef)
                     {
-                        Id = value;
-                        if (!isGroupDef)
-                        {
-                            panel.Children.Clear();
-                            InstantiateGroupDef(ElementStore.GetGroupDef(value));
-                        }
+                        panel.Children.Clear();
+                        InstantiateGroupDef(ElementStore.GetGroupDef(value));
                     }
                     break;
                 case "instanceid":
-                    if (get) value = InstanceId;
-                    else InstanceId = value;
+                    InstanceId = value;
                     break;
             }
         }

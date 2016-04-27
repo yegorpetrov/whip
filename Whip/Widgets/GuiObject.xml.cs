@@ -14,6 +14,9 @@ namespace Whip.Widgets
 {
     partial class GuiObject
     {
+        private readonly IDictionary<string, string> props =
+            new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
         readonly static protected IXmlDpAdapter
             byteToDouble01 = new ByteTo01Adapter(),
             simpleInt = new IntegerAdapter(),
@@ -27,14 +30,14 @@ namespace Whip.Widgets
 
         public string GetXmlProperty(string name)
         {
-            var result = default(string);
-            ProcessXmlProperty(name, ref result);
-            return result;
+            string result;
+            props.TryGetValue(name, out result);
+            return result ?? string.Empty;
         }
 
         public void SetXmlProperty(string name, string value)
         {
-            ProcessXmlProperty(name, ref value);
+            ProcessXmlProperty(name, props[name] = value);
         }
 
         /// <summary>
@@ -42,64 +45,43 @@ namespace Whip.Widgets
         /// </summary>
         /// <param name="name">Property name</param>
         /// <param name="value">Property value (null to get, non-null to set)</param>
-        protected virtual void ProcessXmlProperty(string name, ref string value)
+        protected virtual void ProcessXmlProperty(string name, string value)
         {
-            var adapter = default(IXmlDpAdapter);
-            var dp = default(DependencyProperty);
             switch (name)
             {
                 case "alpha":
-                    adapter = byteToDouble01;
-                    dp = OpacityProperty;
+                    SetValue(OpacityProperty, int.Parse(value) / 255.0);
                     break;
                 case "visible":
-                    adapter = bool2vis;
-                    dp = VisibilityProperty;
+                    SetValue(VisibilityProperty, int.Parse(value) == 1 ? Visibility.Visible : Visibility.Hidden);
                     break;
                 case "x":
-                    adapter = simpleInt;
-                    dp = RelatPanel.XProperty;
+                    SetValue(RelatPanel.XProperty, int.Parse(value));
                     break;
                 case "y":
-                    adapter = simpleInt;
-                    dp = RelatPanel.YProperty;
+                    SetValue(RelatPanel.YProperty, int.Parse(value));
                     break;
                 case "w":
-                    adapter = simpleInt;
-                    dp = RelatPanel.WProperty;
+                    SetValue(RelatPanel.WProperty, int.Parse(value));
                     break;
                 case "h":
-                    adapter = simpleInt;
-                    dp = RelatPanel.HProperty;
+                    SetValue(RelatPanel.HProperty, int.Parse(value));
                     break;
                 case "relatx":
-                    adapter = simpleInt;
-                    dp = RelatPanel.RelatXProperty;
+                    SetValue(RelatPanel.RelatXProperty, int.Parse(value));
                     break;
                 case "relaty":
-                    adapter = simpleInt;
-                    dp = RelatPanel.RelatYProperty;
+                    SetValue(RelatPanel.RelatYProperty, int.Parse(value));
                     break;
                 case "relatw":
-                    adapter = simpleInt;
-                    dp = RelatPanel.RelatWProperty;
+                    SetValue(RelatPanel.RelatWProperty, int.Parse(value));
                     break;
                 case "relath":
-                    adapter = simpleInt;
-                    dp = RelatPanel.RelatHProperty;
+                    SetValue(RelatPanel.RelatHProperty, int.Parse(value));
                     break;
                 case "fitparent":
-                    adapter = simpleInt;
-                    dp = RelatPanel.FitParentProperty;
+                    SetValue(RelatPanel.FitParentProperty, int.Parse(value));
                     break;
-            }
-            if (value == null)
-            {
-                value = adapter?.GetDp(dp, this);
-            }
-            else
-            {
-                adapter?.SetDp(dp, this, value);
             }
         }
 

@@ -18,9 +18,9 @@ namespace Whip.Widgets
             Content = txt = new TextBlock() { Foreground = Brushes.White };
         }
 
-        protected override void ProcessXmlProperty(string name, ref string value)
+        protected override void ProcessXmlProperty(string name, string value)
         {
-            base.ProcessXmlProperty(name, ref value);
+            base.ProcessXmlProperty(name, value);
             switch (name)
             {
                 case "default":

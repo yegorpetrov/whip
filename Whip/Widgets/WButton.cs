@@ -21,7 +21,7 @@ namespace Whip.Widgets
             Content = img = new Image();
         }
 
-        protected override void ProcessXmlProperty(string name, ref string value)
+        protected override void ProcessXmlProperty(string name, string value)
         {
             switch (name.ToLower(CultureInfo.InvariantCulture))
             {
@@ -35,7 +35,7 @@ namespace Whip.Widgets
                     down = ElementStore.GetBitmap(value);
                     break;
                 default:
-                    base.ProcessXmlProperty(name, ref value);
+                    base.ProcessXmlProperty(name, value);
                     break;
             }
         }

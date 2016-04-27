@@ -66,7 +66,7 @@ namespace Whip.Widgets
 
         }
 
-        protected override void ProcessXmlProperty(string name, ref string value)
+        protected override void ProcessXmlProperty(string name, string value)
         {
             // TODO handle get
             switch (name)
@@ -81,7 +81,7 @@ namespace Whip.Widgets
                 case "bottom": bottom.Source = ElementStore.GetBitmap(value); break;
                 case "bottomright": bottomright.Source = ElementStore.GetBitmap(value); break;
             }
-            base.ProcessXmlProperty(name, ref value);
+            base.ProcessXmlProperty(name, value);
         }
     }
 }
