@@ -16,6 +16,8 @@ namespace WhipMaki
         {
             this.objects = objects.ToArray();
             this.listeners = listeners;
+
+            this.listeners.ForEach(l => l.Subscribe(this.objects[l.objectIndex]));
         }
 
         public object this[int i]

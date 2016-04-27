@@ -24,13 +24,16 @@ namespace WhipMaki
             var guid = listener.Maki.Guids[import.TypeIdx];
 
             @event = ResolveEvent(ctx.ResolveType(guid), import.Name);
-            handler = hm(@event, listener.Offset);
+            if (@event != null)
+            {
+                handler = hm(@event, listener.Offset);
+            }
             objectIndex = listener.ObjIdx;
         }
 
         public void Subscribe(object o)
         {
-            if (o != null)
+            if (o != null && handler != null)
             {
                 @event.AddEventHandler(o, handler);
             }
@@ -38,7 +41,7 @@ namespace WhipMaki
 
         public void Unsubscribe(object o)
         {
-            if (o != null)
+            if (o != null && handler != null)
             {
                 @event.RemoveEventHandler(o, handler);
             }
