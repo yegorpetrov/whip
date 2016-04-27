@@ -62,6 +62,10 @@ namespace Whip.Widgets
                         }
                     }
                     break;
+                case "instanceid":
+                    if (get) value = InstanceId;
+                    else InstanceId = value;
+                    break;
             }
         }
 

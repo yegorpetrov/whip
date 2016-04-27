@@ -6,8 +6,8 @@ namespace WhipMaki
 {
     class ScriptMemory : IEnumerable<object>
     {
-        object[] objects;
-        IEnumerable<ScriptEvent> listeners;
+        readonly object[] objects;
+        readonly IEnumerable<ScriptEvent> listeners;
 
         public ScriptMemory(
             IEnumerable<object> objects,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using System.Windows.Media;
 
 namespace Whip.Widgets
 {
+    [DebuggerDisplay("{Id}")]
     partial class GuiObject
     {
         public string Id
