@@ -50,7 +50,6 @@ namespace Whip.Widgets
             switch (name)
             {
                 case "id":
-                    Id = value;
                     if (!isGroupDef)
                     {
                         panel.Children.Clear();

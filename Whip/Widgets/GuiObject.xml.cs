@@ -47,7 +47,7 @@ namespace Whip.Widgets
         /// <param name="value">Property value (null to get, non-null to set)</param>
         protected virtual void ProcessXmlProperty(string name, string value)
         {
-            switch (name)
+            switch (name.ToLower())
             {
                 case "alpha":
                     SetValue(OpacityProperty, int.Parse(value) / 255.0);
@@ -81,6 +81,9 @@ namespace Whip.Widgets
                     break;
                 case "fitparent":
                     SetValue(RelatPanel.FitParentProperty, int.Parse(value));
+                    break;
+                case "id":
+                    Id = value;
                     break;
             }
         }

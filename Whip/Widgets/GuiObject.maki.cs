@@ -9,7 +9,6 @@ using System.Windows.Media;
 
 namespace Whip.Widgets
 {
-    [DebuggerDisplay("{Id}")]
     partial class GuiObject
     {
         public string Id

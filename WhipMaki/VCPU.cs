@@ -21,7 +21,7 @@ namespace WhipMaki
             BindingFlags.Instance;
 
         readonly Maki maki;
-        readonly IScriptContext ctx;
+        public readonly IScriptContext Context;
         readonly IReadOnlyList<Type> types;
         readonly IReadOnlyList<ScriptImport> imports;
         readonly byte[] code;
@@ -35,7 +35,7 @@ namespace WhipMaki
             {
                 throw new ArgumentNullException(nameof(ctx));
             }
-            this.ctx = ctx;
+            Context = ctx;
 
             maki = new Maki(exe);
             types = maki.Guids.Select(
@@ -57,7 +57,7 @@ namespace WhipMaki
 
         object InstantiateIfGuid(object o)
         {
-            return o is Guid ? ctx.GetStaticObject((Guid)o) : o;
+            return o is Guid ? Context.GetStaticObject((Guid)o) : o;
         }
 
         public void Shutdown()
@@ -72,7 +72,13 @@ namespace WhipMaki
 
         object CreateInstance(int n)
         {
-            return Activator.CreateInstance(ctx.ResolveType(maki.Guids[n]));
+            return Activator.CreateInstance(Context.ResolveType(maki.Guids[n]));
+        }
+
+        public object Run(int offset, params object[] args)
+        {
+            args.ForEach(a => stack.Push(a));
+            return Execute(offset);
         }
 
         object Execute(int offset) => ExecuteAndStop(offset, int.MaxValue);
